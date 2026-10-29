@@ -2,14 +2,23 @@
 
 Overture Maps 'places' GeoParquet → 앱이 읽는 작은 JSON(data/bali-places.json)
 
-사용: python tools/build_bali_places.py <입력.parquet> <출력.json> [overture_release]
+단계 (GitHub Actions에서 순서대로 실행)
+  extract <입력.parquet> <places.json>                 Overture 장소 추출 + 인지도 재료(A)
+  wiki    <wiki.json>                                  위키데이터 발리 항목(위키백과 언어 수)
+  naver   <places.json> <counts.json> [최대호출수]       네이버 블로그 언급 수(B), 캐시에 누적
+  final   <places.json> <wiki.json> <counts.json> <out.json> [release]   합산 인기 점수 → 앱용 JSON
 데이터 출처: Overture Maps Foundation (CDLA Permissive 2.0 등, 원천: OpenStreetMap·Meta·Microsoft·Foursquare 등)
 """
 import datetime
 import json
+import math
+import os
 import re
 import struct
 import sys
+import time
+import urllib.parse
+import urllib.request
 
 CATS = ['식당', '카페', '여행스팟', '숙소']
 MIN_CONFIDENCE = 0.45
@@ -118,6 +127,35 @@ def as_obj(v):
     return v
 
 
+# 발리 여행 지역 (대략적인 직사각형 경계: 서, 남, 동, 북). 앱의 REGIONS와 같은 순서·id
+REGIONS = [
+    ('seminyak', '스미냑·르기안', '스미냑', 'Seminyak·Legian', (115.145, -8.715, 115.182, -8.665)),
+    ('kuta', '꾸따', '꾸따', 'Kuta', (115.160, -8.760, 115.190, -8.715)),
+    ('canggu', '짱구', '짱구', 'Canggu', (115.110, -8.665, 115.160, -8.615)),
+    ('jimbaran', '짐바란', '짐바란', 'Jimbaran', (115.145, -8.805, 115.195, -8.760)),
+    ('uluwatu', '울루와뚜·빙인', '울루와뚜', 'Uluwatu·Bingin', (115.070, -8.850, 115.150, -8.790)),
+    ('ungasan', '멜라스티·판다와', '멜라스티', 'Melasti·Pandawa', (115.150, -8.860, 115.215, -8.805)),
+    ('nusadua', '누사두아', '누사두아', 'Nusa Dua·Benoa', (115.195, -8.830, 115.245, -8.750)),
+    ('sanur', '사누르', '사누르', 'Sanur', (115.240, -8.725, 115.275, -8.660)),
+    ('denpasar', '덴파사르', '덴파사르', 'Denpasar', (115.182, -8.700, 115.240, -8.610)),
+    ('ubud', '우붓', '우붓', 'Ubud', (115.235, -8.545, 115.295, -8.475)),
+    ('tegallalang', '뜨갈랄랑·띠르따엠풀', '뜨갈랄랑', 'Tegallalang·Tampaksiring', (115.255, -8.475, 115.335, -8.385)),
+    ('kintamani', '킨타마니', '킨타마니', 'Kintamani·Batur', (115.300, -8.330, 115.420, -8.200)),
+    ('bedugul', '브두굴', '브두굴', 'Bedugul', (115.120, -8.320, 115.200, -8.240)),
+    ('tanahlot', '따나롯', '따나롯', 'Tanah Lot', (115.060, -8.640, 115.110, -8.590)),
+    ('east', '아메드·동부', '아메드', 'Amed·East Bali', (115.480, -8.560, 115.720, -8.300)),
+    ('lovina', '로비나', '로비나', 'Lovina', (114.950, -8.200, 115.100, -8.130)),
+    ('nusapenida', '누사페니다', '누사페니다', 'Nusa Penida·Lembongan', (115.420, -8.850, 115.630, -8.660)),
+]
+
+
+def region_of(lat, lng):
+    for i, (_, _, _, _, (w, s, e, n)) in enumerate(REGIONS):
+        if w <= lng <= e and s <= lat <= n:
+            return i
+    return -1
+
+
 def row_to_place(r):
     names = as_obj(r.get('names')) or {}
     name = (names.get('primary') if isinstance(names, dict) else None) or ''
@@ -165,14 +203,26 @@ def row_to_place(r):
     if isinstance(addrs, list) and addrs:
         a = addrs[0] or {}
         area = (a.get('locality') or a.get('region') or '') if isinstance(a, dict) else ''
-    return {'name': name, 'lat': lat, 'lng': lng, 'ci': ci, 'kind': kind_label(cat), 'area': str(area)[:40]}
+
+    # 인지도 재료(A): 몇 개 지도 서비스에 등록됐나, 웹사이트·SNS·전화·브랜드, 신뢰도
+    srcs = as_obj(r.get('sources')) or []
+    datasets = {str(x.get('dataset', '')).lower() for x in srcs if isinstance(x, dict) and x.get('dataset')} if isinstance(srcs, list) else set()
+    nonempty = lambda v: bool(as_obj(v)) if v is not None else False
+    brand = as_obj(r.get('brand'))
+    return {'name': name, 'lat': lat, 'lng': lng, 'ci': ci, 'kind': kind_label(cat), 'area': str(area)[:40],
+            'src_n': max(1, len(datasets)), 'web': nonempty(r.get('websites')), 'soc': nonempty(r.get('socials')),
+            'phone': nonempty(r.get('phones')), 'brand': bool(brand), 'conf': float(conf) if conf is not None else 0.5}
 
 
-def build(rows, release=''):
+def place_key(p):
+    return f"{p['name']}|{p['lat']:.3f}|{p['lng']:.3f}"
+
+
+def extract(rows):
     places, seen = [], set()
-    stats = {'rows': 0, 'kept': 0}
+    n = 0
     for r in rows:
-        stats['rows'] += 1
+        n += 1
         p = row_to_place(r)
         if not p:
             continue
@@ -180,21 +230,208 @@ def build(rows, release=''):
         if sig in seen:
             continue
         seen.add(sig)
+        p['region'] = region_of(p['lat'], p['lng'])
         places.append(p)
-    places.sort(key=lambda p: (p['ci'], p['name'].lower()))
+    return places, n
+
+
+# ---------------- 위키데이터 (관광지 인지도 보강) ----------------
+WIKI_SPARQL = """SELECT ?item ?label ?coord ?sl WHERE {
+  SERVICE wikibase:box { ?item wdt:P625 ?coord .
+    bd:serviceParam wikibase:cornerSouthWest "Point(114.35 -9.0)"^^geo:wktLiteral .
+    bd:serviceParam wikibase:cornerNorthEast "Point(115.8 -7.95)"^^geo:wktLiteral . }
+  ?item wikibase:sitelinks ?sl . FILTER(?sl > 0)
+  OPTIONAL { ?item rdfs:label ?label . FILTER(LANG(?label) IN ("en", "id")) }
+}"""
+UA = 'TripFlow-data-builder/1.0 (https://github.com/youncall31-glitch/tripflow)'
+
+
+def fetch_wiki():
+    url = 'https://query.wikidata.org/sparql?format=json&query=' + urllib.parse.quote(WIKI_SPARQL)
+    req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'application/sparql-results+json'})
+    with urllib.request.urlopen(req, timeout=120) as res:
+        d = json.load(res)
+    out = {}
+    for b in d['results']['bindings']:
+        m = re.match(r'Point\(([-\d.]+) ([-\d.]+)\)', b['coord']['value'])
+        if not m or 'label' not in b:
+            continue
+        qid = b['item']['value'].rsplit('/', 1)[-1]
+        out.setdefault(qid, [float(m.group(2)), float(m.group(1)), int(b['sl']['value']), set()])[3].add(b['label']['value'])
+    return [[sorted(v[3]), v[0], v[1], v[2]] for v in out.values()]
+
+
+# ---------------- 이름 비교 ----------------
+GENERIC = {'warung', 'cafe', 'coffee', 'kopi', 'restaurant', 'resto', 'bar', 'kitchen', 'bali', 'the', 'and', 'villa',
+           'villas', 'house', 'beach', 'club', 'spa', 'shop', 'store', 'food', 'makan', 'rumah', 'bakery', 'grill',
+           'pura', 'temple', 'hotel', 'resort', 'homestay', 'guest', 'inn', 'bistro', 'lounge', 'eatery', 'babi',
+           'nasi', 'ayam', 'ikan', 'mie', 'sate', 'seafood', 'pizza', 'burger', 'juice', 'tea', 'co', 'by', 'de',
+           'la', 'le', 'di', 'jl', 'jalan', 'kuta', 'ubud', 'canggu', 'seminyak', 'sanur', 'denpasar', 'jimbaran'}
+
+
+def words(name):
+    return [w for w in re.split(r'[^0-9a-z가-힣]+', name.lower()) if w]
+
+
+def distinctive(name):
+    return [w for w in words(name) if w not in GENERIC and len(w) >= 3]
+
+
+def hav_m(a_lat, a_lng, b_lat, b_lng):
+    r = math.pi / 180
+    h = math.sin((b_lat - a_lat) * r / 2) ** 2 + math.cos(a_lat * r) * math.cos(b_lat * r) * math.sin((b_lng - a_lng) * r / 2) ** 2
+    return 2 * 6371000 * math.asin(min(1, math.sqrt(h)))
+
+
+def match_wiki(places, wiki):
+    grid = {}
+    for labels, lat, lng, sl in wiki:
+        grid.setdefault((round(lat, 2), round(lng, 2)), []).append((labels, lat, lng, sl))
+    hits = 0
+    for p in places:
+        best = 0
+        pw = set(distinctive(p['name']))
+        if not pw:
+            continue
+        gl, gn = round(p['lat'], 2), round(p['lng'], 2)
+        for dl in (-0.01, 0, 0.01):
+            for dn in (-0.01, 0, 0.01):
+                for labels, lat, lng, sl in grid.get((round(gl + dl, 2), round(gn + dn, 2)), []):
+                    if sl <= best or hav_m(p['lat'], p['lng'], lat, lng) > 500:
+                        continue
+                    if any(pw & set(distinctive(l)) for l in labels):
+                        best = sl
+        if best:
+            p['wiki'] = best
+            hits += 1
+    return hits
+
+
+# ---------------- 네이버 블로그 언급 수 (B) ----------------
+def naver_query(p):
+    return f'"{p["name"]}" 발리'
+
+
+def naver_total(query, cid, secret, mode):
+    if mode == 'hub':
+        url = 'https://naverapihub.apigw.ntruss.com/search/v1/blog?' + urllib.parse.urlencode({'query': query, 'display': 1})
+        headers = {'X-NCP-APIGW-API-KEY-ID': cid, 'X-NCP-APIGW-API-KEY': secret}
+    else:
+        url = 'https://openapi.naver.com/v1/search/blog.json?' + urllib.parse.urlencode({'query': query, 'display': 1})
+        headers = {'X-Naver-Client-Id': cid, 'X-Naver-Client-Secret': secret}
+    req = urllib.request.Request(url, headers={**headers, 'User-Agent': UA})
+    with urllib.request.urlopen(req, timeout=15) as res:
+        return int(json.load(res).get('total', 0))
+
+
+def naver_candidates(places, counts, today, stale_days=60):
+    """식당·카페·관광지 중 이름이 흔하지 않은 곳. 여행 지역 → 관광지 → 나머지 순, 오래된 값부터"""
+    out = []
+    for p in places:
+        if p['ci'] == 3 or not distinctive(p['name']):
+            continue
+        c = counts.get(place_key(p))
+        if c and (today - datetime.date.fromisoformat(c[1])).days < stale_days:
+            continue
+        prio = (0 if p['region'] >= 0 else 1, 0 if p['ci'] == 2 else 1, c[1] if c else '0000')
+        out.append((prio, p))
+    out.sort(key=lambda x: x[0])
+    return [p for _, p in out]
+
+
+def update_naver(places, counts, limit, cid, secret, fetch=naver_total, sleep=0.11, log=print):
+    today = datetime.date.today()
+    todo = naver_candidates(places, counts, today)[:limit]
+    modes = ['open', 'hub']
+    if os.environ.get('NAVER_API', '').lower() == 'hub':
+        modes.reverse()
+    mode, done, fails = None, 0, 0
+    for p in todo:
+        q = naver_query(p)
+        try:
+            if mode is None:  # 처음 한 번은 두 방식 다 시도해서 되는 쪽으로
+                for m in modes:
+                    try:
+                        total = fetch(q, cid, secret, m)
+                        mode = m
+                        log(f'naver api mode: {m}')
+                        break
+                    except Exception as e:
+                        log(f'naver api mode {m} failed: {e}')
+                if mode is None:
+                    raise RuntimeError('naver auth failed in both modes')
+            else:
+                total = fetch(q, cid, secret, mode)
+        except RuntimeError:
+            raise
+        except Exception as e:
+            fails += 1
+            if '429' in str(e) or fails > 200:  # 하루 한도 초과 등 → 여기까지 저장하고 종료
+                log(f'stop: {e}')
+                break
+            continue
+        counts[place_key(p)] = [total, today.isoformat()]
+        done += 1
+        if sleep:
+            time.sleep(sleep)
+    return done, len(todo), fails
+
+
+# ---------------- 합산 점수 ----------------
+def a_raw(p):
+    return (1.2 * (p['src_n'] - 1) + 1.0 * p['web'] + 0.8 * p['soc'] + 0.3 * p['phone'] + 0.5 * p['brand']
+            + 1.0 * p['conf'] + 2.0 * math.log2(1 + p.get('wiki', 0)))
+
+
+def pct_ranks(vals):
+    """값 → 0~1 백분위 (같은 값은 평균 순위)"""
+    order = sorted(range(len(vals)), key=lambda i: vals[i])
+    out = [0.0] * len(vals)
+    i = 0
+    n = max(1, len(vals) - 1)
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and vals[order[j + 1]] == vals[order[i]]:
+            j += 1
+        r = (i + j) / 2 / n
+        for k in range(i, j + 1):
+            out[order[k]] = r
+        i = j + 1
+    return out
+
+
+def finalize(places, wiki, counts, release=''):
+    match_wiki(places, wiki)
+    for ci in range(len(CATS)):
+        grp = [p for p in places if p['ci'] == ci]
+        if not grp:
+            continue
+        pa = pct_ranks([a_raw(p) for p in grp])
+        withb = [(i, counts[place_key(p)][0]) for i, p in enumerate(grp) if place_key(p) in counts]
+        pb = {}
+        if withb:
+            ranks = pct_ranks([math.log10(1 + c) for _, c in withb])
+            pb = {i: r for (i, _), r in zip(withb, ranks)}
+        for i, p in enumerate(grp):
+            score = 0.5 * pa[i] + 0.5 * pb[i] if i in pb else pa[i]
+            p['pop'] = min(99, int(score * 100))
+            p['blog'] = counts[place_key(p)][0] if place_key(p) in counts else None
+    places.sort(key=lambda p: (p['ci'], -p['pop'], p['name'].lower()))
     kinds = sorted({p['kind'] for p in places})
     kidx = {k: i for i, k in enumerate(kinds)}
-    stats['kept'] = len(places)
-    out = {
-        'v': 1,
+    return {
+        'v': 2,
         'built': datetime.date.today().isoformat(),
         'release': release,
-        'source': 'Overture Maps Foundation places (OpenStreetMap, Meta, Microsoft, Foursquare 등) · CDLA Permissive 2.0',
+        'source': 'Overture Maps Foundation places (OpenStreetMap, Meta, Microsoft, Foursquare 등) · CDLA Permissive 2.0; Wikidata (CC0); 네이버 블로그 검색 결과 수',
+        'score': '인기 점수 = 공개 데이터 인지도(등록 서비스 수·웹/SNS·위키백과) 백분위 50% + 네이버 블로그 언급 수 백분위 50% (분류별)',
         'cats': CATS,
         'kinds': kinds,
-        'p': [[p['name'], round(p['lat'] * 1e5), round(p['lng'] * 1e5), p['ci'], kidx[p['kind']], p['area']] for p in places],
+        'regions': [{'id': r[0], 'ko': r[1], 'q': r[2], 'en': r[3], 'b': list(r[4])} for r in REGIONS],
+        # [이름, 위도e5, 경도e5, 분류, 종류, 동네, 인기(0-99), 지역(-1=없음), 블로그 글 수(null=미조사)]
+        'p': [[p['name'], round(p['lat'] * 1e5), round(p['lng'] * 1e5), p['ci'], kidx[p['kind']], p['area'],
+               p['pop'], p['region'], p['blog']] for p in places],
     }
-    return out, stats
 
 
 def gh(level, msg):
@@ -208,49 +445,77 @@ def read_parquet_rows(path):
     pf = pq.ParquetFile(path)
     names = set(pf.schema_arrow.names)
     gh('notice', f'rows={pf.metadata.num_rows} columns={sorted(names)}')
-    for col in ('categories', 'basic_category', 'taxonomy', 'bbox', 'names'):
-        if col in names:
-            gh('notice', f'{col}: {pf.schema_arrow.field(col).type}'[:900])
     want = [c for c in ('names', 'categories', 'basic_category', 'taxonomy', 'confidence', 'operating_status',
-                        'addresses', 'bbox', 'geometry') if c in names]
+                        'addresses', 'bbox', 'geometry', 'sources', 'websites', 'socials', 'phones', 'brand') if c in names]
     for batch in pf.iter_batches(batch_size=20000, columns=want):
         for r in batch.to_pylist():
             yield r
 
 
-SAMPLES = []
+def load_json(path, default):
+    try:
+        with open(path, encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return default
 
 
-def sampled(rows):
-    for r in rows:
-        if len(SAMPLES) < 3:
-            SAMPLES.append({k: (str(v)[:160] if k != 'geometry' else '<wkb>') for k, v in r.items()})
-        yield r
+def save_json(path, obj, compact=True):
+    os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(obj, f, ensure_ascii=False, separators=(',', ':') if compact else None, indent=None if compact else 0)
 
 
 def main():
-    src, dst = sys.argv[1], sys.argv[2]
-    release = sys.argv[3] if len(sys.argv) > 3 else ''
-    try:
-        out, stats = build(sampled(read_parquet_rows(src)), release)
-    except Exception:
-        import traceback
-        gh('error', traceback.format_exc()[-1500:])
-        gh('notice', f'samples={SAMPLES}'[:1500])
-        sys.exit(1)
-    by_cat = {c: 0 for c in CATS}
-    for r in out['p']:
-        by_cat[CATS[r[3]]] += 1
-    gh('notice', f"rows={stats['rows']} kept={stats['kept']} by_cat={by_cat}")
-    if stats['kept'] < 1000:
-        gh('notice', f'samples={SAMPLES}'[:1500])
-        gh('error', f'too few places ({stats["kept"]}) - schema change? not writing output')
-        sys.exit(1)
-    import os
-    os.makedirs(os.path.dirname(dst) or '.', exist_ok=True)
-    with open(dst, 'w', encoding='utf-8') as f:
-        json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
-    gh('notice', f'wrote {dst} ({os.path.getsize(dst) // 1024} KB)')
+    cmd = sys.argv[1]
+    if cmd == 'extract':
+        places, n = extract(read_parquet_rows(sys.argv[2]))
+        by_cat = {c: sum(1 for p in places if p['ci'] == i) for i, c in enumerate(CATS)}
+        in_regions = sum(1 for p in places if p['region'] >= 0)
+        gh('notice', f'rows={n} kept={len(places)} by_cat={by_cat} in_regions={in_regions}')
+        if len(places) < 1000:
+            gh('error', f'too few places ({len(places)}) - schema change?')
+            sys.exit(1)
+        save_json(sys.argv[3], places)
+    elif cmd == 'wiki':
+        try:
+            wiki = fetch_wiki()
+            gh('notice', f'wikidata items={len(wiki)}')
+        except Exception as e:
+            gh('warning', f'wikidata skipped: {e}')
+            wiki = []
+        save_json(sys.argv[2], wiki)
+    elif cmd == 'naver':
+        cid, secret = os.environ.get('NAVER_CLIENT_ID', ''), os.environ.get('NAVER_CLIENT_SECRET', '')
+        if not cid or not secret:
+            gh('notice', 'NAVER_CLIENT_ID/SECRET 비밀값이 없어 블로그 언급 수(B)는 건너뜀')
+            return
+        places = load_json(sys.argv[2], [])
+        counts = load_json(sys.argv[3], {})
+        limit = int(sys.argv[4]) if len(sys.argv) > 4 else 20000
+        try:
+            done, todo, fails = update_naver(places, counts, limit, cid, secret)
+        except RuntimeError as e:
+            gh('error', f'네이버 검색 API 인증 실패 - 키를 확인해 주세요 ({e})')
+            sys.exit(1)
+        finally:
+            save_json(sys.argv[3], counts, compact=False)
+        gh('notice', f'naver: queried={done}/{todo} fails={fails} cached={len(counts)}')
+    elif cmd == 'final':
+        places = load_json(sys.argv[2], [])
+        if len(places) < 1000:
+            gh('error', '추출된 장소가 없어 앱용 JSON을 만들지 않음 (기존 파일 유지)')
+            sys.exit(1)
+        wiki = load_json(sys.argv[3], [])
+        counts = load_json(sys.argv[4], {})
+        out = finalize(places, wiki, counts, sys.argv[6] if len(sys.argv) > 6 else '')
+        wiki_hits = sum(1 for p in places if p.get('wiki'))
+        with_blog = sum(1 for r in out['p'] if r[8] is not None)
+        save_json(sys.argv[5], out)
+        gh('notice', f'final: places={len(out["p"])} wiki_matched={wiki_hits} with_blog_counts={with_blog} '
+                     f'size={os.path.getsize(sys.argv[5]) // 1024}KB')
+    else:
+        sys.exit(f'unknown command {cmd}')
 
 
 if __name__ == '__main__':

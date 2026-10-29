@@ -1,16 +1,24 @@
 name: 발리 장소 데이터 만들기
 
-# Overture Maps 오픈 데이터에서 발리 식당·카페·명소·숙소를 뽑아 data/bali-places.json 으로 저장
-# - 수동 실행(Actions 탭 → Run workflow), 스크립트 변경 시, 매월 1일 자동 갱신
+# 발리 식당·카페·관광지·숙소 + 인기 점수 → data/bali-places.json
+#  A. 공개 데이터 인지도: Overture Maps(등록 서비스 수·웹/SNS), 위키데이터(위키백과 언어 수)
+#  B. 한국 블로그 언급 수: 네이버 블로그 검색 결과 수 (저장소 Settings → Secrets 의 NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 사용,
+#     키는 이 작업 안에서만 쓰이고 앱·저장소에는 남지 않음. 하루 25,000회 한도라 여러 번에 나눠 채움)
+# 실행: 수동(Actions 탭 → Run workflow), 스크립트 변경 시, 매주 월요일 자동
 on:
   workflow_dispatch:
+    inputs:
+      naver_limit:
+        description: '이번에 조회할 네이버 검색 횟수 (하루 최대 25,000)'
+        required: false
+        default: '20000'
   push:
     branches: [main]
     paths:
       - 'tools/build_bali_places.py'
       - '.github/workflows/bali-places.yml'
   schedule:
-    - cron: '17 3 1 * *'
+    - cron: '17 18 * * 0'   # 매주 월요일 03:17 (한국 시간)
 
 permissions:
   contents: write
@@ -23,7 +31,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
 
@@ -35,23 +43,36 @@ jobs:
         run: pip install --quiet overturemaps pyarrow
 
       - name: 발리 장소 내려받기 (Overture Maps 최신 릴리스)
-        run: |
-          overturemaps download --bbox=114.35,-9.0,115.8,-7.95 -f geoparquet --type=place -o /tmp/bali.parquet
-          ls -lh /tmp/bali.parquet
+        run: overturemaps download --bbox=114.35,-9.0,115.8,-7.95 -f geoparquet --type=place -o /tmp/bali.parquet
 
-      - name: 앱용 JSON 만들기
+      - name: 장소 추출 + 인지도 재료(A)
+        run: python -B tools/build_bali_places.py extract /tmp/bali.parquet /tmp/places.json
+
+      - name: 위키데이터 (관광지 인지도)
+        run: python -B tools/build_bali_places.py wiki /tmp/wiki.json
+
+      - name: 네이버 블로그 언급 수(B)
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          NAVER_API: ${{ vars.NAVER_API }}
+        run: python -B tools/build_bali_places.py naver /tmp/places.json data/naver-counts.json "${{ github.event.inputs.naver_limit || '20000' }}"
+
+      - name: 합산 인기 점수 → 앱용 JSON
+        if: always()   # 네이버 단계가 한도 초과로 멈춰도, 그때까지 모은 값으로 점수 계산
         run: |
           RELEASE=$(pip show overturemaps | awk '/^Version/{print "overturemaps-py " $2}')
-          python tools/build_bali_places.py /tmp/bali.parquet data/bali-places.json "$RELEASE"
-          ls -lh data/bali-places.json
+          python -B tools/build_bali_places.py final /tmp/places.json /tmp/wiki.json data/naver-counts.json data/bali-places.json "$RELEASE"
 
       - name: 저장소에 반영
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/bali-places.json
+          git add data/bali-places.json data/naver-counts.json 2>/dev/null || git add data/bali-places.json
           if git diff --cached --quiet; then echo "변경 없음"; exit 0; fi
           git commit -m "발리 장소 데이터 갱신 ($(date -u +%Y-%m-%d))"
+          git pull --rebase --quiet origin main
           git push
 
       - name: 사이트 다시 배포
