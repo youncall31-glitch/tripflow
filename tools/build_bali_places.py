@@ -183,11 +183,20 @@ def build(rows, release=''):
     return out, stats
 
 
+def gh(level, msg):
+    """GitHub Actions 주석(annotation)으로도 남겨서 API로 확인 가능하게"""
+    msg = str(msg).replace('%', '%25').replace('\r', '').replace('\n', '%0A')
+    print(f'::{level}::{msg}', flush=True)
+
+
 def read_parquet_rows(path):
     import pyarrow.parquet as pq
     pf = pq.ParquetFile(path)
     names = set(pf.schema_arrow.names)
-    print('columns:', sorted(names))
+    gh('notice', f'rows={pf.metadata.num_rows} columns={sorted(names)}')
+    for col in ('categories', 'basic_category', 'taxonomy', 'bbox', 'names'):
+        if col in names:
+            gh('notice', f'{col}: {pf.schema_arrow.field(col).type}'[:900])
     want = [c for c in ('names', 'categories', 'basic_category', 'taxonomy', 'confidence', 'operating_status',
                         'addresses', 'bbox', 'geometry') if c in names]
     for batch in pf.iter_batches(batch_size=20000, columns=want):
@@ -195,16 +204,34 @@ def read_parquet_rows(path):
             yield r
 
 
+SAMPLES = []
+
+
+def sampled(rows):
+    for r in rows:
+        if len(SAMPLES) < 3:
+            SAMPLES.append({k: (str(v)[:160] if k != 'geometry' else '<wkb>') for k, v in r.items()})
+        yield r
+
+
 def main():
     src, dst = sys.argv[1], sys.argv[2]
     release = sys.argv[3] if len(sys.argv) > 3 else ''
-    out, stats = build(read_parquet_rows(src), release)
+    try:
+        out, stats = build(sampled(read_parquet_rows(src)), release)
+    except Exception:
+        import traceback
+        gh('error', traceback.format_exc()[-1500:])
+        gh('notice', f'samples={SAMPLES}'[:1500])
+        sys.exit(1)
     by_cat = {c: 0 for c in CATS}
     for r in out['p']:
         by_cat[CATS[r[3]]] += 1
-    print(f"rows={stats['rows']} kept={stats['kept']} by_cat={by_cat}")
+    gh('notice', f"rows={stats['rows']} kept={stats['kept']} by_cat={by_cat}")
     if stats['kept'] < 1000:
-        sys.exit(f'too few places ({stats["kept"]}) - schema change? not writing output')
+        gh('notice', f'samples={SAMPLES}'[:1500])
+        gh('error', f'too few places ({stats["kept"]}) - schema change? not writing output')
+        sys.exit(1)
     with open(dst, 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
     print('wrote', dst)
