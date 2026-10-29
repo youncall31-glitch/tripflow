@@ -281,7 +281,8 @@ GENERIC = {'warung', 'cafe', 'coffee', 'kopi', 'restaurant', 'resto', 'bar', 'ki
            'villas', 'house', 'beach', 'club', 'spa', 'shop', 'store', 'food', 'makan', 'rumah', 'bakery', 'grill',
            'pura', 'temple', 'hotel', 'resort', 'homestay', 'guest', 'inn', 'bistro', 'lounge', 'eatery', 'babi',
            'nasi', 'ayam', 'ikan', 'mie', 'sate', 'seafood', 'pizza', 'burger', 'juice', 'tea', 'co', 'by', 'de',
-           'la', 'le', 'di', 'jl', 'jalan', 'kuta', 'ubud', 'canggu', 'seminyak', 'sanur', 'denpasar', 'jimbaran'}
+           'la', 'le', 'di', 'jl', 'jalan', 'kuta', 'ubud', 'canggu', 'seminyak', 'sanur', 'denpasar', 'jimbaran',
+           'pantai', 'objek', 'wisata', 'kawasan', 'luar', 'tempio', 'tempel', 'desa', 'adat', 'dalem', 'agung'}
 
 
 def words(name):
@@ -394,8 +395,36 @@ def update_naver(places, counts, limit, cid, secret, fetch=naver_total, sleep=0.
 
 # ---------------- 합산 점수 ----------------
 def a_raw(p):
-    return (1.2 * (p['src_n'] - 1) + 1.0 * p['web'] + 0.8 * p['soc'] + 0.3 * p['phone'] + 0.5 * p['brand']
+    # 체인 브랜드(맥도날드·스타벅스 등)는 '여행 맛집'이 아니라 가산점 대신 감점
+    brand = -1.5 if p['brand'] and p['ci'] in (0, 1) else 0.5 * p['brand']
+    return (1.2 * (p['src_n'] - 1) + 1.0 * p['web'] + 0.8 * p['soc'] + 0.3 * p['phone'] + brand
             + 1.0 * p['conf'] + 2.0 * math.log2(1 + p.get('wiki', 0)))
+
+
+def merge_dup_spots(places):
+    """같은 관광지가 언어별로 여러 번 등록된 경우(Pura Uluwatu / Uluwatu Temple / Tempio di Uluwatu) 하나만 남김"""
+    spots = sorted([p for p in places if p['ci'] == 2], key=lambda p: -a_raw(p))
+    keep, grid, drop = [], {}, set()
+    for p in spots:
+        pw = set(distinctive(p['name']))
+        cell = (round(p['lat'], 2), round(p['lng'], 2))
+        dup = False
+        for dl in (-0.01, 0, 0.01):
+            for dn in (-0.01, 0, 0.01):
+                for q in grid.get((round(cell[0] + dl, 2), round(cell[1] + dn, 2)), []):
+                    if pw and pw & q[1] and hav_m(p['lat'], p['lng'], q[0]['lat'], q[0]['lng']) < 150:
+                        dup = True
+                        q[0]['wiki'] = max(q[0].get('wiki', 0), p.get('wiki', 0))
+                        break
+                if dup:
+                    break
+            if dup:
+                break
+        if dup:
+            drop.add(id(p))
+        else:
+            grid.setdefault(cell, []).append((p, pw))
+    return [p for p in places if id(p) not in drop], len(drop)
 
 
 def pct_ranks(vals):
@@ -417,6 +446,8 @@ def pct_ranks(vals):
 
 def finalize(places, wiki, counts, release=''):
     match_wiki(places, wiki)
+    places[:], merged = merge_dup_spots(places)
+    print(f'merged duplicate spots: {merged}')
     for ci in range(len(CATS)):
         grp = [p for p in places if p['ci'] == ci]
         if not grp:
@@ -429,7 +460,7 @@ def finalize(places, wiki, counts, release=''):
             pb = {i: r for (i, _), r in zip(withb, ranks)}
         for i, p in enumerate(grp):
             score = 0.5 * pa[i] + 0.5 * pb[i] if i in pb else pa[i]
-            p['pop'] = min(99, int(score * 100))
+            p['pop'] = min(999, int(score * 1000))  # 0~999 (동점 줄이기)
             p['blog'] = counts[place_key(p)][0] if place_key(p) in counts else None
     places.sort(key=lambda p: (p['ci'], -p['pop'], p['name'].lower()))
     kinds = sorted({p['kind'] for p in places})
@@ -443,7 +474,7 @@ def finalize(places, wiki, counts, release=''):
         'cats': CATS,
         'kinds': kinds,
         'regions': [{'id': r[0], 'ko': r[1], 'q': r[2], 'en': r[3], 'b': list(r[4])} for r in REGIONS],
-        # [이름, 위도e5, 경도e5, 분류, 종류, 동네, 인기(0-99), 지역(-1=없음), 블로그 글 수(null=미조사)]
+        # [이름, 위도e5, 경도e5, 분류, 종류, 동네, 인기(0-999), 지역(-1=없음), 블로그 글 수(null=미조사)]
         'p': [[p['name'], round(p['lat'] * 1e5), round(p['lng'] * 1e5), p['ci'], kidx[p['kind']], p['area'],
                p['pop'], p['region'], p['blog']] for p in places],
     }
