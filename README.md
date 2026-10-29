@@ -3,5 +3,9 @@
 지도에서 여행 동선을 짜고 이동시간, 주변 장소, 블로그 후기를 확인하는 단일 HTML 웹앱입니다.
 
 - 사이트: https://youncall31-glitch.github.io/tripflow/
-- 일정과 설정은 사용하는 기기의 브라우저에만 저장됩니다.
+- 일정과 설정은 사용하는 기기의 브라우저에만 저장됩니다. 계정·키 없이 동작합니다.
+- 여러 날짜 일정, 종료 시간, 핀을 끌어 위치 수정, 구글맵 하루 길찾기·구글 내 지도(KML) 내보내기를 지원합니다.
+- 발리 장소 검색·주변 탐색은 `data/bali-places.json`(Overture Maps 오픈 데이터)을 사용합니다. 이 파일은 GitHub Actions의 '발리 장소 데이터 만들기' 작업이 매월 자동으로 갱신합니다.
 - 국내 지점 검색은 앱의 지도 설정 → '카카오 장소 검색'에서 본인의 카카오 JavaScript 키를 연결하면 사용할 수 있습니다. 키는 저장소에 포함되지 않습니다.
+
+장소 데이터 출처: © OpenStreetMap 기여자, Overture Maps Foundation (CDLA Permissive 2.0 등).

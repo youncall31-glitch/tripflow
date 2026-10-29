@@ -1,0 +1,61 @@
+name: 발리 장소 데이터 만들기
+
+# Overture Maps 오픈 데이터에서 발리 식당·카페·명소·숙소를 뽑아 data/bali-places.json 으로 저장
+# - 수동 실행(Actions 탭 → Run workflow), 스크립트 변경 시, 매월 1일 자동 갱신
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/build_bali_places.py'
+      - '.github/workflows/bali-places.yml'
+  schedule:
+    - cron: '17 3 1 * *'
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: bali-places
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 도구 설치
+        run: pip install --quiet overturemaps pyarrow
+
+      - name: 발리 장소 내려받기 (Overture Maps 최신 릴리스)
+        run: |
+          overturemaps download --bbox=114.35,-9.0,115.8,-7.95 -f geoparquet --type=place -o /tmp/bali.parquet
+          ls -lh /tmp/bali.parquet
+
+      - name: 앱용 JSON 만들기
+        run: |
+          RELEASE=$(pip show overturemaps | awk '/^Version/{print "overturemaps-py " $2}')
+          python tools/build_bali_places.py /tmp/bali.parquet data/bali-places.json "$RELEASE"
+          ls -lh data/bali-places.json
+
+      - name: 저장소에 반영
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/bali-places.json
+          if git diff --cached --quiet; then echo "변경 없음"; exit 0; fi
+          git commit -m "발리 장소 데이터 갱신 ($(date -u +%Y-%m-%d))"
+          git push
+
+      - name: 사이트 다시 배포
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds"
