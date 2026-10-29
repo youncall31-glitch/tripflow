@@ -503,7 +503,7 @@ const PRESETS = {
     { label: '12/6 (토)', stops: [
       { ...BALI_VILLA, time: '07:30', end: '08:30', note: '아침 식사 (숙소 제공 조식) · 위치는 핀을 끌어 실제 숙소로 옮겨 주세요' },
       { time: '10:10', end: '11:10', name: '빤따이 바투바락 (Pantai Batu Barak)', category: '여행스팟', note: '사진 촬영', lat: -8.84501, lng: 115.17430 },
-      { time: '11:40', end: '14:10', name: 'Palmilla Bali Beach Club', category: '식당', note: '점심 식사 · 멜라스티 비치', lat: -8.84730, lng: 115.16230 },
+      { time: '11:40', end: '14:10', name: 'Palmilla Bali Beach Club', category: '식당', note: '점심 식사 · 멜라스티 비치', lat: -8.84779, lng: 115.15765 },
       { time: '14:40', end: '16:40', name: '울루와뜨 사원 (Uluwatu Temple)', category: '여행스팟', note: '관광 및 산책', lat: -8.82915, lng: 115.08490 },
       { time: '17:20', end: '19:40', name: 'Menega Cafe', category: '식당', note: '저녁 식사 · 짐바란 씨푸드', lat: -8.78072, lng: 115.16438 },
       { ...BALI_VILLA, time: '20:40', note: '숙소 복귀' },
@@ -513,7 +513,7 @@ const PRESETS = {
       { time: '09:30', end: '11:00', name: 'Pura Tirta Empul (띠르따 엠풀)', category: '여행스팟', note: '성스러운 샘물 사원', lat: -8.41546, lng: 115.31550 },
       { time: '11:40', end: '13:20', name: 'AKASA Specialty Coffee (킨타마니)', category: '카페', note: '점심 식사', lat: -8.27956, lng: 115.35756 },
       { time: '14:00', end: '15:30', name: '우붓 왕궁 (Ubud Palace)', category: '여행스팟', note: '우붓 왕궁, 스타벅스 및 전통시장 산책', lat: -8.50693, lng: 115.26256 },
-      { time: '17:00', end: '18:30', name: 'Livingstone (스미냑)', category: '식당', note: '저녁 식사 · 대안: Sisterfields (Jl. Kayu Cendana 7)', lat: -8.67810, lng: 115.15560 },
+      { time: '17:00', end: '18:30', name: 'Livingstone (스미냑)', category: '식당', note: '저녁 식사 · 대안: Sisterfields (Jl. Kayu Cendana 7)', lat: -8.67174, lng: 115.16143 },
       { ...BALI_VILLA, time: '18:45', note: '숙소 복귀' },
     ] },
   ] },
@@ -1056,7 +1056,7 @@ function loadOpenData() {
   if (!openLoading) {
     openLoading = fetchJSON(OPEN_DATA_URL, { timeout: 25000 }).then(d => {
       const cats = d.cats || [], kinds = d.kinds || [];
-      openData = (d.p || []).map(r => ({ name: String(r[0]), lat: r[1] / 1e5, lng: r[2] / 1e5, cat: cats[r[3]] || '여행스팟', kind: kinds[r[4]] || '', area: r[5] || '', nn: normName(r[0]) }))
+      openData = (d.p || []).map(r => ({ name: String(r[0]), lat: r[1] / 1e5, lng: r[2] / 1e5, cat: cats[r[3]] || '여행스팟', kind: kinds[r[4]] || '', area: r[5] || '', nn: normName(r[0]), words: String(r[0]).toLowerCase().split(/[\s()·\-_.,'"&/]+/).filter(Boolean) }))
         .filter(x => x.name && Number.isFinite(x.lat) && Number.isFinite(x.lng));
       openData.meta = { built: d.built || '', release: d.release || '' };
       return openData;
@@ -1070,17 +1070,18 @@ async function searchOpen(q, center) {
   const nq = normName(q), toks = q.toLowerCase().split(/\s+/).map(normName).filter(Boolean);
   if (!nq) return [];
   const hits = [];
+  const wordStart = t => x => x.words.some(w => w.startsWith(t));
   for (const x of data) {
     let sc;
-    if (x.nn === nq) sc = 0;
-    else if (x.nn.startsWith(nq)) sc = 1;
-    else if (x.nn.includes(nq)) sc = 2;
-    else if (toks.length > 1 && toks.every(t => x.nn.includes(t))) sc = 3;
+    if (x.nn === nq) sc = 0;                                              // 이름이 정확히 같음
+    else if (x.nn.startsWith(nq)) sc = 1;                                 // 이름이 검색어로 시작
+    else if (toks.length && toks.every(t => wordStart(t)(x))) sc = 2;     // 각 단어가 이름 속 단어 앞부분과 일치
+    else if (nq.length >= 6 && x.nn.includes(nq)) sc = 3;                 // 긴 검색어(6자 이상)만 중간 일치 허용
     else continue;
     hits.push([sc, haversineKm(center, x), x]);
   }
   hits.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-  return hits.slice(0, 40).map(([, dist, x]) => ({ src: 'open', kid: '', url: '', name: x.name, lat: x.lat, lng: x.lng, category: x.cat, kind: x.kind, sub: x.area, dist }));
+  return hits.slice(0, 40).map(([sc, dist, x]) => ({ exact: sc === 0, src: 'open', kid: '', url: '', name: x.name, lat: x.lat, lng: x.lng, category: x.cat, kind: x.kind, sub: x.area, dist }));
 }
 async function openNearby(s) {
   const data = await loadOpenData(), food = [], spots = [];
@@ -1112,9 +1113,12 @@ function mergeResults(s) {
     out.push(r);
   };
   (isKorea(s.center.lat, s.center.lng) ? [kakaoList, s.osm, s.open || []] : [s.open || [], s.osm, kakaoList]).forEach(list => list.forEach(add));
+  const nq = normName(s.q), isExact = r => normName(r.name) === nq;
+  const exact = out.filter(isExact).sort((a, b) => a.dist - b.dist).slice(0, 10), rest = out.filter(r => !isExact(r));
   return {
-    near: out.filter(r => r.dist <= NEAR_KM).sort((a, b) => a.dist - b.dist).slice(0, 45),
-    far: out.filter(r => r.dist > NEAR_KM).slice(0, 25),
+    exact,
+    near: rest.filter(r => r.dist <= NEAR_KM).sort((a, b) => a.dist - b.dist).slice(0, 45),
+    far: rest.filter(r => r.dist > NEAR_KM).slice(0, 25),
   };
 }
 
@@ -1163,13 +1167,14 @@ function setSearchBusy(busy) {
 function renderResults(keepScroll) {
   const s = lastSearch, ul = $('#results');
   if (!s) { ul.hidden = true; return; }
-  const { near, far } = mergeResults(s);
-  lastResults = near.concat(far);
+  const { exact, near, far } = mergeResults(s);
+  lastResults = exact.concat(near, far);
   const row = (r, i) => `<li><button class="r-row" type="button" data-i="${i}">${icon(catOf(r.category).icon)}<span class="r-text"><span class="r-name">${esc(r.name)}</span><span class="r-sub">${esc([r.sub, r.kind].filter(Boolean).join(' · '))}</span></span><span class="r-dist">${fmtKm(r.dist)}</span></button></li>`;
   let h = '';
-  if (near.length) h += `<li class="r-head">지금 보는 지역 근처</li>${near.map(row).join('')}`;
+  if (exact.length) h += `<li class="r-head">이름이 같은 곳</li>${exact.map(row).join('')}`;
+  if (near.length) h += `<li class="r-head">지금 보는 지역 근처</li>${near.map((r, i) => row(r, exact.length + i)).join('')}`;
   if (s.more) h += `<li class="r-more"><button class="r-row" type="button" data-more>${icon('plus')}가까운 곳 더 보기</button></li>`;
-  if (far.length) h += `<li class="r-head">${near.length ? '다른 지역' : '검색 결과'}</li>${far.map((r, i) => row(r, near.length + i)).join('')}`;
+  if (far.length) h += `<li class="r-head">${exact.length || near.length ? '다른 지역' : '검색 결과'}</li>${far.map((r, i) => row(r, exact.length + near.length + i)).join('')}`;
   if (!lastResults.length) h += `<li class="r-empty">'${esc(s.q)}' 검색 결과가 없어요. 다른 이름으로 찾거나 지도를 탭해 보세요.</li>`;
   h += resultsFoot(s);
   const top = ul.scrollTop;

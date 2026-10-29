@@ -29,6 +29,10 @@ SPOT = {'attraction', 'attractions', 'landmark', 'historical', 'temple', 'shrine
         'water_park', 'amusement', 'swing', 'surf', 'surfing', 'snorkeling', 'diving', 'monkey', 'forest', 'spring',
         'springs', 'hot', 'plaza', 'cultural', 'heritage', 'scenic', 'sightseeing', 'tourist', 'nature', 'reserve',
         'sanctuary', 'pier', 'harbor', 'bay', 'river'}
+# 이 단어가 들어간 분류는 무조건 제외 (예: hardware_home_and_garden_store, food_and_beverage_store)
+STRICT = {'store', 'stores', 'shopping', 'supermarket', 'warehouse', 'wholesale', 'hardware',
+          'dealer', 'dealership', 'supplier', 'manufacturer', 'distributor', 'service', 'services', 'rental', 'atm'}
+SHOP = {'shop', 'shops'}  # coffee_shop·ice_cream_shop·dessert_shop 같은 카페류만 살리고 나머지 가게는 제외
 NEVER = {'barber', 'barbers', 'bank', 'atm', 'hospital', 'clinic', 'dentist', 'pharmacy', 'school', 'office',
          'company', 'contractor', 'repair', 'agency', 'insurance', 'lawyer', 'gas', 'parking', 'car', 'motorcycle',
          'store', 'shop', 'shopping', 'supermarket', 'convenience', 'laundry', 'salon', 'spa', 'gym', 'fitness'}
@@ -49,6 +53,12 @@ KO = {
     'museum': '박물관', 'art_gallery': '갤러리', 'waterfall': '폭포', 'scenic_lookout': '전망대',
     'market': '시장', 'farmers_market': '전통시장', 'zoo': '동물원', 'water_park': '워터파크',
     'amusement_park': '놀이공원', 'palace': '궁전', 'rice_field': '논', 'hiking_trail': '트레킹',
+    'cultural_and_historic': '문화·역사 명소', 'lodging': '숙소', 'private_lodging': '개인 숙소',
+    'casual_eatery': '캐주얼 식당', 'food_and_drink': '음식·음료', 'river': '강', 'mountain': '산',
+    'scuba_diving_center': '다이빙', 'food_truck_stand': '푸드트럭', 'campground': '캠핑장', 'eat_and_drink': '음식·음료',
+    'fine_dining_restaurant': '파인다이닝', 'breakfast_and_brunch_restaurant': '브런치', 'night_club': '나이트클럽',
+    'waterfall': '폭포', 'lake': '호수', 'island': '섬', 'nature_reserve': '자연보호구역', 'landmark': '명소',
+    'religious_site': '종교 명소', 'place_of_worship': '사원', 'tourist_information': '관광 안내', 'viewpoint': '전망대',
 }
 
 
@@ -62,6 +72,10 @@ def classify(cat_list):
         if not cat:
             continue
         t = tokens(cat)
+        if t & STRICT and 'holiday_rental_home' not in cat.lower():
+            continue
+        if t & SHOP and not t & CAFE:
+            continue
         if t & NEVER and not (t & (FOOD | CAFE | SPOT | STAY) - {'bar'}):
             continue
         if t & CAFE:
