@@ -394,9 +394,15 @@ def update_naver(places, counts, limit, cid, secret, fetch=naver_total, sleep=0.
 
 
 # ---------------- 합산 점수 ----------------
+CHAINS = re.compile(r"\b(mcd|mcdonald'?s?|kfc|burger king|starbucks|domino'?s|pizza hut|j\.?\s?co|black canyon|subway|a&w|"
+                    r"texas chicken|ack fried|solaria|hokben|chatime|circle k|indomaret|alfamart|upnormal|richeese|"
+                    r"wendy'?s|baskin|dunkin|janji jiwa|kopi kenangan|point coffee|fore coffee|excelso|gloria jean'?s)\b", re.I)
+
+
 def a_raw(p):
     # 체인 브랜드(맥도날드·스타벅스 등)는 '여행 맛집'이 아니라 가산점 대신 감점
-    brand = -1.5 if p['brand'] and p['ci'] in (0, 1) else 0.5 * p['brand']
+    chain = p['ci'] in (0, 1) and (p['brand'] or CHAINS.search(p['name']))
+    brand = -3.0 if chain else 0.5 * p['brand']
     return (1.2 * (p['src_n'] - 1) + 1.0 * p['web'] + 0.8 * p['soc'] + 0.3 * p['phone'] + brand
             + 1.0 * p['conf'] + 2.0 * math.log2(1 + p.get('wiki', 0)))
 
@@ -412,7 +418,7 @@ def merge_dup_spots(places):
         for dl in (-0.01, 0, 0.01):
             for dn in (-0.01, 0, 0.01):
                 for q in grid.get((round(cell[0] + dl, 2), round(cell[1] + dn, 2)), []):
-                    if pw and pw & q[1] and hav_m(p['lat'], p['lng'], q[0]['lat'], q[0]['lng']) < 150:
+                    if pw and pw & q[1] and hav_m(p['lat'], p['lng'], q[0]['lat'], q[0]['lng']) < 300:
                         dup = True
                         q[0]['wiki'] = max(q[0].get('wiki', 0), p.get('wiki', 0))
                         break
