@@ -238,26 +238,41 @@ def extract(rows):
 # ---------------- 위키데이터 (관광지 인지도 보강) ----------------
 WIKI_SPARQL = """SELECT ?item ?label ?coord ?sl WHERE {
   SERVICE wikibase:box { ?item wdt:P625 ?coord .
-    bd:serviceParam wikibase:cornerSouthWest "Point(114.35 -9.0)"^^geo:wktLiteral .
-    bd:serviceParam wikibase:cornerNorthEast "Point(115.8 -7.95)"^^geo:wktLiteral . }
+    bd:serviceParam wikibase:cornerSouthWest "Point(%s %s)"^^geo:wktLiteral .
+    bd:serviceParam wikibase:cornerNorthEast "Point(%s %s)"^^geo:wktLiteral . }
   ?item wikibase:sitelinks ?sl . FILTER(?sl > 0)
-  OPTIONAL { ?item rdfs:label ?label . FILTER(LANG(?label) IN ("en", "id")) }
+  ?item rdfs:label ?label . FILTER(LANG(?label) IN ("en", "id"))
 }"""
 UA = 'TripFlow-data-builder/1.0 (https://github.com/youncall31-glitch/tripflow)'
 
 
-def fetch_wiki():
-    url = 'https://query.wikidata.org/sparql?format=json&query=' + urllib.parse.quote(WIKI_SPARQL)
-    req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'application/sparql-results+json'})
-    with urllib.request.urlopen(req, timeout=120) as res:
-        d = json.load(res)
+def fetch_wiki(tiles=4, tries=3):
+    """발리를 tiles×tiles 칸으로 나눠 조회 (한 번에 받으면 응답이 끊기는 경우가 있어서)"""
+    w0, s0, e0, n0 = BBOX
     out = {}
-    for b in d['results']['bindings']:
-        m = re.match(r'Point\(([-\d.]+) ([-\d.]+)\)', b['coord']['value'])
-        if not m or 'label' not in b:
-            continue
-        qid = b['item']['value'].rsplit('/', 1)[-1]
-        out.setdefault(qid, [float(m.group(2)), float(m.group(1)), int(b['sl']['value']), set()])[3].add(b['label']['value'])
+    for i in range(tiles):
+        for j in range(tiles):
+            w, e = w0 + (e0 - w0) * i / tiles, w0 + (e0 - w0) * (i + 1) / tiles
+            so, n = s0 + (n0 - s0) * j / tiles, s0 + (n0 - s0) * (j + 1) / tiles
+            q = WIKI_SPARQL % (f'{w:.4f}', f'{so:.4f}', f'{e:.4f}', f'{n:.4f}')
+            body = urllib.parse.urlencode({'query': q, 'format': 'json'}).encode()
+            for t in range(tries):
+                try:
+                    req = urllib.request.Request('https://query.wikidata.org/sparql', data=body,
+                                                 headers={'User-Agent': UA, 'Accept': 'application/sparql-results+json'})
+                    with urllib.request.urlopen(req, timeout=120) as res:
+                        d = json.loads(res.read())
+                    break
+                except Exception:
+                    if t == tries - 1:
+                        raise
+                    time.sleep(5 * (t + 1))
+            for b in d['results']['bindings']:
+                m = re.match(r'Point\(([-\d.]+) ([-\d.]+)\)', b['coord']['value'])
+                if not m:
+                    continue
+                qid = b['item']['value'].rsplit('/', 1)[-1]
+                out.setdefault(qid, [float(m.group(2)), float(m.group(1)), int(b['sl']['value']), set()])[3].add(b['label']['value'])
     return [[sorted(v[3]), v[0], v[1], v[2]] for v in out.values()]
 
 

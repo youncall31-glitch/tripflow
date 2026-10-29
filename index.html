@@ -199,6 +199,18 @@ a{color:inherit;text-decoration:none;touch-action:manipulation}
 .tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
 .tools .label{width:100%;font-size:13px;font-weight:650;color:var(--text-3)}
 .daybar{margin-top:-4px;margin-bottom:8px}
+.tab{font-size:15px}
+.region-chips{margin-bottom:8px}
+.legend{display:flex;align-items:center;gap:8px;margin:12px 0 2px;font-size:12.5px;font-weight:650;color:var(--text-3)}
+.legend i{flex:1;height:10px;border-radius:5px}
+.area-sum{margin:4px 0 2px}
+.rank{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:var(--h);color:#fff;font-size:14px;font-weight:800;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.area-row .rank{color:#fff}
+.heat{display:grid;place-items:center;width:var(--s);height:var(--s);border:2px solid #fff;border-radius:50%;background:var(--h);color:#fff;font:800 11px/1 var(--font);box-shadow:0 1px 5px rgba(0,0,0,.35)}
+.gnear{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:8px 0 6px;padding:10px 12px;border-radius:14px;background:var(--surface-2);font-size:13px;font-weight:650;color:var(--text-2)}
+.gnear .acts{margin-top:0}
+.time-budget{margin-top:10px}
+.time-budget b{color:var(--text)}
 .fchip .fcount{margin-left:2px;font-weight:800;opacity:.7}
 .fchip.add{display:inline-flex;align-items:center;gap:4px;border-style:dashed;color:var(--text-3)}
 .fchip.add .ic{width:16px;height:16px}
@@ -398,6 +410,7 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
       <div class="tabs" role="tablist" aria-label="패널 보기">
         <button class="tab" role="tab" id="tab-route" data-tab="route" aria-selected="true" aria-controls="content">동선 <span class="count" id="cntRoute">0</span></button>
         <button class="tab" role="tab" id="tab-nearby" data-tab="nearby" aria-selected="false" aria-controls="content">주변 <span class="count" id="cntNearby" hidden></span></button>
+        <button class="tab" role="tab" id="tab-areas" data-tab="areas" aria-selected="false" aria-controls="content">지역</button>
         <button class="tab" role="tab" id="tab-reviews" data-tab="reviews" aria-selected="false" aria-controls="content">후기</button>
       </div>
     </div>
@@ -530,6 +543,30 @@ const PRESETS = {
     { time: '16:30', name: '후시미 이나리 신사 (여우신사)', category: '여행스팟', note: '센본토리이 붉은 도리이 터널', lat: 34.9671, lng: 135.7727 },
   ] }] },
 };
+/* 발리 여행 지역 [id, 표시 이름, 블로그 검색어, [서, 남, 동, 북]] — tools/build_bali_places.py 의 REGIONS와 동일 */
+const REGIONS = [
+  ['seminyak', '스미냑·르기안', '스미냑', [115.145, -8.715, 115.182, -8.665]],
+  ['kuta', '꾸따', '꾸따', [115.160, -8.760, 115.190, -8.715]],
+  ['canggu', '짱구', '짱구', [115.110, -8.665, 115.160, -8.615]],
+  ['jimbaran', '짐바란', '짐바란', [115.145, -8.805, 115.195, -8.760]],
+  ['uluwatu', '울루와뚜·빙인', '울루와뚜', [115.070, -8.850, 115.150, -8.790]],
+  ['ungasan', '멜라스티·판다와', '멜라스티', [115.150, -8.860, 115.215, -8.805]],
+  ['nusadua', '누사두아', '누사두아', [115.195, -8.830, 115.245, -8.750]],
+  ['sanur', '사누르', '사누르', [115.240, -8.725, 115.275, -8.660]],
+  ['denpasar', '덴파사르', '덴파사르', [115.182, -8.700, 115.240, -8.610]],
+  ['ubud', '우붓', '우붓', [115.235, -8.545, 115.295, -8.475]],
+  ['tegallalang', '뜨갈랄랑·띠르따엠풀', '뜨갈랄랑', [115.255, -8.475, 115.335, -8.385]],
+  ['kintamani', '킨타마니', '킨타마니', [115.300, -8.330, 115.420, -8.200]],
+  ['bedugul', '브두굴', '브두굴', [115.120, -8.320, 115.200, -8.240]],
+  ['tanahlot', '따나롯', '따나롯', [115.060, -8.640, 115.110, -8.590]],
+  ['east', '아메드·동부', '아메드', [115.480, -8.560, 115.720, -8.300]],
+  ['lovina', '로비나', '로비나', [114.950, -8.200, 115.100, -8.130]],
+  ['nusapenida', '누사페니다', '누사페니다', [115.420, -8.850, 115.630, -8.660]],
+].map(([id, ko, q, b]) => ({ id, ko, q, b }));
+const REGION_BY_ID = Object.fromEntries(REGIONS.map(r => [r.id, r]));
+const regionAt = (lat, lng) => REGIONS.find(r => lng >= r.b[0] && lng <= r.b[2] && lat >= r.b[1] && lat <= r.b[3]) || null;
+const regionKm2 = r => (r.b[2] - r.b[0]) * 111.32 * Math.cos(((r.b[1] + r.b[3]) / 2) * Math.PI / 180) * (r.b[3] - r.b[1]) * 110.57;
+
 /* 예전 버전의 '손대지 않은 샘플'이면 발리 일정으로 자동 교체 */
 const OLD_SAMPLE_NAMES = new Set([...PRESETS.jeju.days[0].stops, ...PRESETS.kyoto.days[0].stops].map(x => x.name)
   .concat(['우붓 몽키포레스트 & 왕궁', '너티 누리스 와룽 우붓', '뜨갈랄랑 라이스테라스 & 발리스윙']));
@@ -614,7 +651,9 @@ function directionsUrl(a, b) {
 const state = {
   days: [], dayId: null, activeId: null,
   mode: 'driving', tab: 'route', filter: 'ALL',
-  tile: 'google_road', theme: 'auto', blogSort: 'recent', sheet: 'half',
+  tile: 'google_road', theme: 'auto', blogSort: 'relevance', blogSortSet: false, sheet: 'half',
+  areas: { sel: [], cat: '식당' },          // 지역 탭: 고른 지역 id 목록, 분류
+  nearbyBase: 'stop', me: null, nearbyAll: false, // 주변 탭: 'stop'(선택한 일정) | 'me'(내 위치)
   route: { key: '', legs: [], coords: null, status: 'idle' },   // status: idle | loading | ok | estimate
   nearby: { key: '', status: 'idle', items: [] },               // status: idle | loading | ok | error
 };
@@ -651,7 +690,7 @@ function loadSaved() {
 }
 function save() {
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify({ v: 2, days: state.days, dayId: state.dayId, activeId: state.activeId, mode: state.mode, tile: state.tile, theme: state.theme, blogSort: state.blogSort }));
+    localStorage.setItem(STORE_KEY, JSON.stringify({ v: 2, days: state.days, dayId: state.dayId, activeId: state.activeId, mode: state.mode, tile: state.tile, theme: state.theme, blogSort: state.blogSort, blogSortSet: state.blogSortSet, areas: state.areas }));
   } catch (e) { /* 사파리 개인정보 보호 모드 등 저장 불가 환경은 조용히 무시 */ }
 }
 const saveSoon = debounce(save, 250);
@@ -1056,8 +1095,15 @@ function loadOpenData() {
   if (!openLoading) {
     openLoading = fetchJSON(OPEN_DATA_URL, { timeout: 25000 }).then(d => {
       const cats = d.cats || [], kinds = d.kinds || [];
-      openData = (d.p || []).map(r => ({ name: String(r[0]), lat: r[1] / 1e5, lng: r[2] / 1e5, cat: cats[r[3]] || '여행스팟', kind: kinds[r[4]] || '', area: r[5] || '', nn: normName(r[0]), words: String(r[0]).toLowerCase().split(/[\s()·\-_.,'"&/]+/).filter(Boolean) }))
-        .filter(x => x.name && Number.isFinite(x.lat) && Number.isFinite(x.lng));
+      const dReg = d.regions || [];
+      openData = (d.p || []).map(r => {
+        const lat = r[1] / 1e5, lng = r[2] / 1e5;
+        const rid = r[7] != null ? (r[7] >= 0 && dReg[r[7]] ? dReg[r[7]].id : '') : ((regionAt(lat, lng) || {}).id || '');
+        return { name: String(r[0]), lat, lng, cat: cats[r[3]] || '여행스팟', kind: kinds[r[4]] || '', area: r[5] || '', pop: r[6] != null ? r[6] : null, rid, blog: r[8] != null ? r[8] : null,
+          nn: normName(r[0]), words: String(r[0]).toLowerCase().split(/[\s()·\-_.,'"&/]+/).filter(Boolean) };
+      }).filter(x => x.name && Number.isFinite(x.lat) && Number.isFinite(x.lng));
+      openData.hasPop = openData.some(x => x.pop != null);
+      openData.hasBlog = openData.some(x => x.blog != null);
       openData.meta = { built: d.built || '', release: d.release || '' };
       return openData;
     }).catch(err => { openLoading = null; throw err; });
@@ -1353,9 +1399,31 @@ function estimateRoute(stops, mode) {
 const nearbyCache = new Map();
 let nearbyCtrl = null;
 const nearbyKey = s => s ? s.lat.toFixed(4) + ',' + s.lng.toFixed(4) : '';
+/* 주변 탐색 기준점: 선택한 일정 장소 또는 내 현재 위치 */
+const nearbyCenter = () => state.nearbyBase === 'me' && state.me ? { id: '', name: '내 위치', lat: state.me.lat, lng: state.me.lng, me: true } : activeStop();
+const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+/* 지금 시각 기준 다음 일정까지 남은 시간 → 걸어서 다녀올 수 있는 거리(왕복, 30분 머무름 가정) */
+function timeBudget() {
+  const now = nowMin(), next = state.stops.find(x => toMin(x.time) > now);
+  if (!next) return null;
+  const free = toMin(next.time) - now;
+  return { next, free, reach: Math.round(clamp((free - 30) / 2 * 75, 250, 3000)) };
+}
+function useMyLocation() {
+  if (!navigator.geolocation) { toast('이 브라우저는 위치 기능을 지원하지 않아요'); return; }
+  toast('현재 위치를 찾는 중…', { ms: 9000 });
+  navigator.geolocation.getCurrentPosition(pos => {
+    hideToast();
+    state.me = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    state.nearbyBase = 'me';
+    state.nearbyAll = false;
+    focusPoint([state.me.lat, state.me.lng], 16);
+    loadNearby(true);
+  }, err => toast(err.code === 1 ? '위치 권한이 꺼져 있어요' : '현재 위치를 찾지 못했어요'), { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+}
 
 async function loadNearby(force = false) {
-  const s = activeStop(), key = nearbyKey(s);
+  const s = nearbyCenter(), key = nearbyKey(s);
   if (!s) { state.nearby = { key: '', status: 'idle', items: [] }; afterNearby(); return; }
   if (!force && state.nearby.key === key && state.nearby.status !== 'error') return;
   if (!force && nearbyCache.has(key)) { state.nearby = { key, status: 'ok', items: nearbyCache.get(key) }; afterNearby(); return; }
@@ -1449,14 +1517,116 @@ function parsePlaces(d, s) {
   const byDist = (a, b) => a.dist - b.dist;
   return food.sort(byDist).slice(0, 30).concat(spots.sort(byDist).slice(0, 12)).sort(byDist);
 }
-const filteredNearby = () => state.filter === 'ALL' ? state.nearby.items : state.nearby.items.filter(p => p.cat === state.filter);
+const filteredNearby = () => {
+  let list = state.filter === 'ALL' ? state.nearby.items : state.nearby.items.filter(p => p.cat === state.filter);
+  const tb = state.nearbyBase === 'me' && !state.nearbyAll ? timeBudget() : null;
+  if (tb) list = list.filter(p => p.dist <= tb.reach);
+  return list;
+};
 const placeMeta = p => [p.kind, p.cuisine, fmtKm(p.dist / 1000), `도보 ${Math.max(1, Math.round(p.dist * 1.25 / 75))}분`].filter(Boolean).join(' · ');
+
+/* =====================================================================
+   8-1. 지역 탭: 고른 지역의 인기 장소를 진하기(빨강)로 표시
+   ===================================================================== */
+const AREA_CATS = [['식당', '식당'], ['카페', '카페'], ['여행스팟', '관광지']];
+const HEAT = ['#7f1d1d', '#b91c1c', '#dc2626', '#f87171', '#fecaca'];
+const heatLevel = f => f < 0.1 ? 0 : f < 0.25 ? 1 : f < 0.5 ? 2 : f < 0.75 ? 3 : 4; // f = 순위 / 전체 (0이 1등)
+let areaLayer = null, areaErr = false, areaFitKey = '';
+const areaLimit = sel => Math.round(clamp(15 + sel.reduce((a, id) => a + regionKm2(REGION_BY_ID[id]), 0) * 0.5, 20, 150)); // 넓을수록 많이
+function areaItems() {
+  if (!openData) return [];
+  const sel = new Set(state.areas.sel), cat = state.areas.cat;
+  const list = openData.filter(x => x.cat === cat && sel.has(x.rid));
+  list.sort((a, b) => (b.pop ?? -1) - (a.pop ?? -1) || (b.blog ?? -1) - (a.blog ?? -1) || a.name.localeCompare(b.name));
+  const top = list.slice(0, areaLimit(state.areas.sel));
+  top.forEach((x, i) => { x.rank = i + 1; x.lvl = heatLevel(i / top.length); });
+  top.total = list.length;
+  return top;
+}
+function ensureOpenData(after) {
+  if (openData) return true;
+  loadOpenData().then(() => { areaErr = false; after(); }).catch(() => { areaErr = true; if (state.tab === 'areas') renderPanel(); });
+  return false;
+}
+const areaCatLabel = c => (AREA_CATS.find(x => x[0] === c) || [, c])[1];
+function areaPlaceBtns(x) {
+  return `<button class="btn-sm primary" type="button" data-action="area-add" data-rank="${x.rank}">${icon('plus')}추가</button>
+    <a class="btn-sm" href="${esc(googlePlaceUrl(x.name, x.lat, x.lng))}" target="_blank" rel="noopener">${icon('pin')}구글맵</a>
+    <a class="btn-sm" href="${esc(blogUrl(`${x.name} 발리`))}" target="_blank" rel="noopener">${icon('book')}블로그</a>`;
+}
+function areasHtml() {
+  const chips = `<div class="filters region-chips" role="group" aria-label="지역 (여러 개 선택 가능)">${REGIONS.map(r =>
+    `<button class="fchip" type="button" data-action="area-toggle" data-key="${r.id}" aria-pressed="${state.areas.sel.includes(r.id)}">${esc(r.ko)}</button>`).join('')}</div>`;
+  const cats = `<div class="seg full sm" role="group" aria-label="분류">${AREA_CATS.map(([k, l]) =>
+    `<button type="button" data-action="area-cat" data-key="${k}" aria-pressed="${state.areas.cat === k}">${l}</button>`).join('')}</div>`;
+  let h = `<div class="sec-head"><div class="title">발리 지역별 인기 장소<b>지역을 골라 보세요 (여러 개 가능)</b></div>${state.areas.sel.length ? `<button class="btn-sm" type="button" data-action="area-clear">선택 해제</button>` : ''}</div>${chips}${cats}`;
+  if (areaErr) return h + `<div class="empty">${icon('alert', 'big')}<h3>발리 장소 데이터를 불러오지 못했어요</h3><p>잠시 후 다시 시도해 주세요.</p><div class="acts"><button class="btn-sm primary" type="button" data-action="area-retry">${icon('refresh')}다시 시도</button></div></div>`;
+  if (!ensureOpenData(() => { if (state.tab === 'areas') { renderPanel(); renderAreas(true); } })) return h + '<div class="skel"></div>'.repeat(4);
+  if (!state.areas.sel.length) {
+    const mine = [...new Set(allStops().map(x => (regionAt(x.lat, x.lng) || {}).id).filter(Boolean))];
+    return h + `<div class="empty">${icon('pin', 'big')}<h3>어느 지역을 볼까요?</h3><p>위에서 지역을 누르면 지도에 인기 장소가 진한 빨강일수록 유명한 순으로 표시돼요.</p>${mine.length ? `<div class="acts"><button class="btn-sm primary" type="button" data-action="area-mine">${icon('route')}내 일정 지역 모두 보기</button></div>` : ''}</div>`;
+  }
+  const items = areaItems();
+  const names = state.areas.sel.map(id => REGION_BY_ID[id].ko).join(', ');
+  h += `<div class="legend"><span>덜 유명</span><i style="background:linear-gradient(90deg,${HEAT.slice().reverse().join(',')})"></i><span>유명</span></div>
+    <p class="hint area-sum">${esc(names)} · ${areaCatLabel(state.areas.cat)} ${items.total}곳 중 상위 ${items.length}곳</p>`;
+  if (!items.length) return h + `<div class="empty"><p>이 지역에 등록된 ${areaCatLabel(state.areas.cat)}가 없어요.</p></div>`;
+  h += items.map(x => `<div class="place area-row" data-rank="${x.rank}">
+      <span class="rank" style="--h:${HEAT[x.lvl]}">${x.rank}</span>
+      <div class="place-body">
+        <div class="place-name">${esc(x.name)}</div>
+        <div class="meta">${esc([x.kind, REGION_BY_ID[x.rid] ? REGION_BY_ID[x.rid].ko : '', x.blog != null ? `블로그 ${x.blog.toLocaleString()}건` : ''].filter(Boolean).join(' · '))}</div>
+        <div class="acts">${areaPlaceBtns(x)}</div>
+      </div>
+    </div>`).join('');
+  h += `<p class="foot">순위 = 공개 데이터 인지도(여러 지도 서비스 등록·웹/SNS·위키백과)${openData.hasBlog ? ' + 네이버 블로그 언급 수' : ''} 기준 추정이에요.${openData.hasBlog ? '' : ' 블로그 언급 수는 데이터가 모이는 대로 반영돼요.'} 별점은 '구글맵'으로 확인하세요. 장소 정보: Overture Maps Foundation(CDLA Permissive 2.0), Wikidata.</p>`;
+  return h;
+}
+function renderAreas(fit) {
+  if (!map) return;
+  if (!areaLayer) areaLayer = L.layerGroup();
+  areaLayer.clearLayers();
+  if (state.tab !== 'areas' || !openData || !state.areas.sel.length) { areaLayer.remove(); return; }
+  const sel = state.areas.sel.map(id => REGION_BY_ID[id]);
+  sel.forEach(r => L.rectangle([[r.b[1], r.b[0]], [r.b[3], r.b[2]]], { color: '#dc2626', weight: 2, dashArray: '6 6', fillColor: '#dc2626', fillOpacity: 0.04, interactive: false }).addTo(areaLayer));
+  const items = areaItems();
+  items.slice().reverse().forEach(x => { // 덜 유명한 곳부터 그려서 유명한 곳이 위에 오게
+    const size = [24, 20, 16, 14, 12][x.lvl];
+    x.marker = L.marker([x.lat, x.lng], {
+      icon: L.divIcon({ className: '', html: `<div class="heat" style="--h:${HEAT[x.lvl]};--s:${size}px">${x.rank <= 10 ? x.rank : ''}</div>`, iconSize: [size, size], iconAnchor: [size / 2, size / 2], popupAnchor: [0, -size / 2] }),
+      title: x.name, zIndexOffset: 500 - x.rank,
+    }).bindPopup(() => areaPopup(x), popupOpts('area')).addTo(areaLayer);
+  });
+  if (!map.hasLayer(areaLayer)) areaLayer.addTo(map);
+  const key = state.areas.sel.join(',');
+  if (fit || key !== areaFitKey) {
+    areaFitKey = key;
+    const w = Math.min(...sel.map(r => r.b[0])), so = Math.min(...sel.map(r => r.b[1])), e = Math.max(...sel.map(r => r.b[2])), n = Math.max(...sel.map(r => r.b[3]));
+    map.fitBounds(L.latLngBounds([[so, w], [n, e]]), { paddingTopLeft: [16, topInset() + 12], paddingBottomRight: [isSide() ? 16 : 60, bottomInset() + 16], animate: !REDUCED });
+  }
+}
+function areaPopup(x) {
+  const el = document.createElement('div');
+  el.className = 'pop';
+  const rg = REGION_BY_ID[x.rid];
+  el.innerHTML = `<div class="pop-title">${esc(x.name)}</div>
+    <div class="pop-sub"><b style="color:${HEAT[Math.min(x.lvl, 2)]}">${rg ? esc(rg.ko) + ' ' : ''}${areaCatLabel(x.cat)} ${x.rank}위</b> · ${esc(x.kind)}${x.blog != null ? ` · 블로그 ${x.blog.toLocaleString()}건` : ''}</div>
+    <div class="acts">${areaPlaceBtns(x)}</div>`;
+  el.addEventListener('click', e => { if (e.target.closest('[data-action="area-add"]')) { map.closePopup(); addFromPlace({ name: x.name, cat: x.cat, kind: x.kind, lat: x.lat, lng: x.lng }); } });
+  return el;
+}
+function toggleArea(id) {
+  const sel = state.areas.sel, i = sel.indexOf(id);
+  if (i >= 0) sel.splice(i, 1); else sel.push(id);
+  saveSoon(); renderPanel(); renderAreas();
+}
 
 function renderPois() {
   if (!map) return;
   poiLayer.clearLayers();
   if (state.tab !== 'nearby' || state.nearby.status !== 'ok') { poiLayer.remove(); return; }
-  const area = keyword((activeStop() || {}).name || '').split(' ')[0];
+  const c0 = nearbyCenter() || {};
+  const area = inBali(c0.lat || 0, c0.lng || 0) ? '발리' : keyword(c0.name || '').split(' ')[0];
   filteredNearby().forEach(p => {
     const c = catOf(p.cat);
     p.marker = L.marker([p.lat, p.lng], {
@@ -1477,7 +1647,8 @@ function poiPopup(p, area) {
 function addFromPlace(p) {
   if (!p) return;
   // 주변 목록에서 추가할 땐 탐색 기준을 그대로 둬서 목록이 바뀌지 않게
-  openStopDialog('add', { name: p.name, category: p.cat, note: [p.kind, p.cuisine].filter(Boolean).join(' · '), lat: p.lat, lng: p.lng, kid: p.kid, time: suggestTime(activeStop()), keepActive: true });
+  const t = state.nearbyBase === 'me' && state.me ? fromMin(Math.ceil((nowMin() + 10) / 5) * 5) : suggestTime(activeStop()); // 내 위치 기준이면 지금 + 10분
+  openStopDialog('add', { name: p.name, category: p.cat, note: [p.kind, p.cuisine].filter(Boolean).join(' · '), lat: p.lat, lng: p.lng, kid: p.kid, time: t, keepActive: true });
 }
 function focusPlace(p) {
   if (!p) return;
@@ -1588,7 +1759,7 @@ function renderHeader() {
   for (const b of document.querySelectorAll('[data-mode]')) b.setAttribute('aria-pressed', String(b.dataset.mode === state.mode));
   $('#cntRoute').textContent = n;
   const cn = $('#cntNearby'), nb = state.nearby;
-  cn.hidden = !(nb.status === 'ok' && nb.key === nearbyKey(activeStop()));
+  cn.hidden = !(nb.status === 'ok' && nb.key === nearbyKey(nearbyCenter()));
   cn.textContent = nb.items.length;
 }
 
@@ -1599,7 +1770,7 @@ function renderPanel() {
   if (ae && el.contains(ae) && ae.matches('input, select')) { pendingPanel = true; return; } // 시간 선택 중엔 다시 그리지 않음
   pendingPanel = false;
   el.setAttribute('aria-labelledby', 'tab-' + state.tab);
-  el.innerHTML = state.tab === 'route' ? routeHtml() : state.tab === 'nearby' ? nearbyHtml() : reviewsHtml();
+  el.innerHTML = state.tab === 'route' ? routeHtml() : state.tab === 'nearby' ? nearbyHtml() : state.tab === 'areas' ? areasHtml() : reviewsHtml();
 }
 
 const presetButtons = () => Object.entries(PRESETS).map(([k, p]) => `<button class="btn-sm" type="button" data-action="preset" data-key="${k}">${esc(p.label)}</button>`).join('');
@@ -1711,12 +1882,31 @@ ${d.stops.map((x, i) => `    <Placemark><name>${xmlEsc(`${multiDay() ? d.label +
 }
 
 const FILTERS = [['ALL', '전체'], ['식당', '식당'], ['카페', '카페'], ['여행스팟', '명소']];
+function googleNearbyLinks(s) {
+  if (isKorea(s.lat, s.lng)) return '';
+  const at = `@${s.lat.toFixed(5)},${s.lng.toFixed(5)},16z`;
+  const g = q => `https://www.google.com/maps/search/${encodeURIComponent(q)}/${at}`;
+  return `<div class="gnear"><span>구글맵에서 별점 보며 찾기</span><div class="acts">
+    <a class="btn-sm" href="${esc(g('restaurants'))}" target="_blank" rel="noopener">${icon('food')}맛집</a>
+    <a class="btn-sm" href="${esc(g('cafes'))}" target="_blank" rel="noopener">${icon('cup')}카페</a>
+    <a class="btn-sm" href="${esc(g('tourist attractions'))}" target="_blank" rel="noopener">${icon('camera')}관광지</a></div></div>`;
+}
 function nearbyHtml() {
-  const s = activeStop();
-  if (!s) return `<div class="empty">${icon('food', 'big')}<h3>기준 장소가 없어요</h3><p>동선에 장소를 추가하면 주변 식당·카페·명소를 찾아드려요.</p></div>`;
+  const s = nearbyCenter();
+  const baseSeg = `<div class="seg sm" role="group" aria-label="탐색 기준">
+      <button type="button" data-action="nb-base" data-key="stop" aria-pressed="${state.nearbyBase !== 'me'}">일정 기준</button>
+      <button type="button" data-action="nb-base" data-key="me" aria-pressed="${state.nearbyBase === 'me'}">${icon('locate')}내 위치</button></div>`;
+  if (!s) return `${baseSeg}<div class="empty">${icon('food', 'big')}<h3>기준 장소가 없어요</h3><p>동선에 장소를 추가하거나 '내 위치'를 눌러 주변 식당·카페·명소를 찾아보세요.</p></div>`;
   const nb = state.nearby;
-  let h = `<div class="sec-head"><div class="title">탐색 기준<b>${stopIndex(s.id) + 1}. ${esc(s.name)}</b></div>
-    <button class="icon-btn" type="button" data-action="refresh-nearby" aria-label="주변 다시 찾기" title="다시 찾기">${icon('refresh')}</button></div>`;
+  let h = `<div class="sec-head"><div class="title">탐색 기준<b>${s.me ? '내 현재 위치' : `${stopIndex(s.id) + 1}. ${esc(s.name)}`}</b></div>
+    <button class="icon-btn" type="button" data-action="refresh-nearby" aria-label="주변 다시 찾기" title="다시 찾기">${icon('refresh')}</button></div>${baseSeg}`;
+  if (s.me) {
+    const tb = timeBudget();
+    h += tb
+      ? `<div class="notice time-budget">${icon('clock')}<span>다음 일정 <b>${esc(tb.next.time)} ${esc(tb.next.name)}</b>까지 <b>${fmtDur(tb.free)}</b> 남았어요. ${state.nearbyAll ? '전체를 보여주는 중' : `왕복 걸어서 다녀올 수 있는 <b>${fmtKm(tb.reach / 1000)}</b> 이내만 보여요`}.</span><button class="btn-sm" type="button" data-action="nb-all">${state.nearbyAll ? '가까운 곳만' : '전체 보기'}</button></div>`
+      : `<div class="notice">${icon('clock')}<span>오늘 남은 일정이 없어요. 자유롭게 둘러보세요!</span></div>`;
+  }
+  h += googleNearbyLinks(s);
   if (nb.key !== nearbyKey(s) || nb.status === 'loading' || nb.status === 'idle') return h + '<div class="skel"></div>'.repeat(4);
   if (nb.status === 'error') {
     return h + `<div class="empty">${icon('alert', 'big')}<h3>주변 장소를 불러오지 못했어요</h3><p>공개 지도 서버가 바쁠 수 있어요.</p><div class="acts"><button class="btn-sm primary" type="button" data-action="refresh-nearby">${icon('refresh')}다시 시도</button></div></div>`;
@@ -1725,7 +1915,7 @@ function nearbyHtml() {
     const n = k === 'ALL' ? nb.items.length : nb.items.filter(p => p.cat === k).length;
     return `<button class="fchip" type="button" data-action="filter" data-key="${k}" aria-pressed="${state.filter === k}">${label} ${n}</button>`;
   }).join('')}</div>`;
-  const list = filteredNearby(), area = keyword(s.name).split(' ')[0];
+  const list = filteredNearby(), area = inBali(s.lat, s.lng) ? '발리' : keyword(s.name).split(' ')[0];
   if (!list.length) {
     h += `<div class="empty"><p>${nb.items.length ? '이 분류에 해당하는 장소가 없어요.' : '반경 안에 지도에 등록된 장소가 없어요.'}</p></div>`;
   } else {
@@ -1759,12 +1949,13 @@ function nearbyHtml() {
 function reviewsHtml() {
   const s = activeStop();
   if (!s) return `<div class="empty">${icon('book', 'big')}<h3>기준 장소가 없어요</h3><p>동선에 장소를 추가하면 블로그·지도 후기를 바로 찾아볼 수 있어요.</p></div>`;
-  const kw = keyword(s.name), kr = isKorea(s.lat, s.lng);
+  const kw = keyword(s.name), kr = isKorea(s.lat, s.lng), rg = regionAt(s.lat, s.lng);
+  const near = rg ? rg.q : `${kw} 근처`; // 발리 지역이면 블로거들이 쓰는 지역명으로 ("짐바란 맛집")
   const tiles = [
-    [blogUrl(`${kw} 후기`), 'book', `${kw} 후기`, '네이버 블로그'],
-    [blogUrl(`${kw} 근처 맛집`), 'food', '근처 맛집', '네이버 블로그'],
-    [blogUrl(`${kw} 근처 카페`), 'cup', '근처 카페', '네이버 블로그'],
-    [blogUrl(`${kw} 코스`), 'route', '코스·동선 팁', '네이버 블로그'],
+    [blogUrl(`${kw} ${inBali(s.lat, s.lng) ? '발리 ' : ''}후기`), 'book', `${kw} 후기`, '네이버 블로그'],
+    [blogUrl(`${near} 맛집`), 'food', `${near} 맛집`, '네이버 블로그'],
+    [blogUrl(`${near} 카페`), 'cup', `${near} 카페`, '네이버 블로그'],
+    [blogUrl(rg ? `${near} 가볼만한곳` : `${kw} 코스`), 'route', rg ? `${near} 가볼만한곳` : '코스·동선 팁', '네이버 블로그'],
     [googlePlaceUrl(s.name, s.lat, s.lng), 'pin', '구글 지도 리뷰', 'Google 지도'],
     s.kid ? [`https://place.map.kakao.com/${s.kid}`, 'pin', '카카오맵 리뷰', '카카오 장소 페이지']
       : kr ? [kakaoSearchUrl(kw), 'pin', '카카오맵 리뷰', '카카오맵'] : [googleSearchUrl(`${kw} 후기`), 'search', '구글 검색', 'Google'],
@@ -1832,6 +2023,8 @@ function setTab(tab) {
   if (tab === 'nearby') loadNearby();
   renderPanel();
   renderPois();
+  renderAreas(tab === 'areas');
+  if (tab !== 'areas' && state.areas.sel.length && openData) areaFitKey = ''; // 다시 들어오면 지역에 맞춰 보기
   $('#content').scrollTop = 0;
   if (!isSide() && state.sheet === 'collapsed') setSheet('half');
 }
@@ -1919,9 +2112,27 @@ function flushTime() {
   const s = state.stops.find(x => x.id === te.id);
   if (!s || !te.value || s.time === te.value) { if (pendingPanel) renderPanel(); return; }
   if (document.activeElement === te.el) te.el.blur();
+  const old = s.time, delta = toMin(te.value) - toMin(old);
+  const after = state.stops.filter(x => x.id !== s.id && x.time > old).map(x => x.id); // 원래 이 일정 뒤에 있던 것들
   s.time = te.value;
+  if (s.end && delta) s.end = fromMin(toMin(s.end) + delta); // 머무는 시간은 그대로 유지
+  if (s.end && s.end <= s.time) delete s.end;
   commit();
-  toast('방문 시간을 바꾸고 시간순으로 다시 정렬했어요');
+  if (delta > 0 && after.length) offerShift(after, delta, '시간을 바꿨어요');
+  else toast('방문 시간을 바꾸고 시간순으로 다시 정렬했어요');
+}
+/* 뒤 일정들을 한꺼번에 n분 밀기 (되돌리기 가능) */
+function offerShift(ids, delta, msg) {
+  toast(`${msg} · 뒤 일정 ${ids.length}곳도 ${fmtDur(delta)} 밀까요?`, { action: '밀기', ms: 7000, onAction: () => shiftStops(ids, delta) });
+}
+function shiftStops(ids, delta) {
+  withUndo(`뒤 일정 ${ids.length}곳을 ${fmtDur(delta)} 밀었어요`, () => {
+    state.stops.forEach(x => {
+      if (!ids.includes(x.id)) return;
+      x.time = fromMin(toMin(x.time) + delta);
+      if (x.end) { x.end = fromMin(toMin(x.end) + delta); if (x.end <= x.time) delete x.end; }
+    });
+  });
 }
 
 /* --- 추가·수정 대화상자 --- */
@@ -1970,7 +2181,11 @@ function onDialogClose() {
     removeTempPin();
     commit();
     onActiveChanged();
-    toast(`${v.time} '${v.name}' 동선에 추가했어요`);
+    const i = state.stops.indexOf(s), next = state.stops[i + 1];
+    const busyUntil = toMin(s.end || fromMin(toMin(s.time) + 30)); // 끝 시간이 없으면 최소 30분 머문다고 봄
+    const overlap = next ? busyUntil - toMin(next.time) : 0;
+    if (overlap > 0) offerShift(state.stops.slice(i + 1).map(x => x.id), Math.ceil(overlap / 5) * 5, `'${v.name}' 추가`);
+    else toast(`${v.time} '${v.name}' 동선에 추가했어요`);
   }
 }
 /* iOS 키보드가 올라오면 대화상자를 보이는 영역 위쪽에 맞춤 */
@@ -2048,17 +2263,27 @@ function bindUI() {
       else if (action === 'retry-route') computeRoute(true);
       else if (action === 'kakao') openKakaoDialog();
       else if (action === 'day') setDay(key);
+      else if (action === 'area-toggle') toggleArea(key);
+      else if (action === 'area-cat') { state.areas.cat = key; saveSoon(); renderPanel(); renderAreas(); $('#content').scrollTop = 0; }
+      else if (action === 'area-clear') { state.areas.sel = []; saveSoon(); renderPanel(); renderAreas(); }
+      else if (action === 'area-mine') { state.areas.sel = [...new Set(allStops().map(x => (regionAt(x.lat, x.lng) || {}).id).filter(Boolean))]; saveSoon(); renderPanel(); renderAreas(true); }
+      else if (action === 'area-retry') { areaErr = false; renderPanel(); }
+      else if (action === 'area-add') { const x = areaItems()[+a.dataset.rank - 1]; if (x) addFromPlace({ name: x.name, cat: x.cat, kind: x.kind, lat: x.lat, lng: x.lng }); }
+      else if (action === 'nb-base') { if (key === 'me') useMyLocation(); else { state.nearbyBase = 'stop'; loadNearby(); renderPanel(); } }
+      else if (action === 'nb-all') { state.nearbyAll = !state.nearbyAll; renderPanel(); renderPois(); }
       else if (action === 'add-day') addDay();
       else if (action === 'del-day') deleteDay();
       else if (action === 'export-kml') exportKml();
       else if (action === 'filter') { state.filter = key; renderPanel(); renderPois(); }
       else if (action === 'add-place') addFromPlace(state.nearby.items[+idx]);
-      else if (action === 'sort') { state.blogSort = key; saveSoon(); renderPanel(); }
+      else if (action === 'sort') { state.blogSort = key; state.blogSortSet = true; saveSoon(); renderPanel(); }
       return;
     }
     if (e.target.closest('a, input, select, button')) return;
     const card = e.target.closest('.stop');
     if (card) { selectStop(card.dataset.id); return; }
+    const ar = e.target.closest('.area-row');
+    if (ar) { const x = areaItems()[+ar.dataset.rank - 1]; if (x) focusPlace(x); return; }
     const pl = e.target.closest('.place');
     if (pl) focusPlace(state.nearby.items[+pl.dataset.idx]);
   });
@@ -2117,7 +2342,8 @@ function init() {
     if (saved.mode === 'walking') state.mode = 'walking';
     if (TILES[saved.tile]) state.tile = saved.tile;
     if (['auto', 'light', 'dark'].includes(saved.theme)) state.theme = saved.theme;
-    if (saved.blogSort === 'relevance') state.blogSort = 'relevance';
+    if (saved.blogSortSet && ['recent', 'relevance'].includes(saved.blogSort)) { state.blogSort = saved.blogSort; state.blogSortSet = true; }
+    if (saved.areas && Array.isArray(saved.areas.sel)) state.areas = { sel: saved.areas.sel.filter(id => REGION_BY_ID[id]).slice(0, 17), cat: ['식당', '카페', '여행스팟'].includes(saved.areas.cat) ? saved.areas.cat : '식당' };
   }
   if (!saved || untouchedSample || !allStops().length && saved.days.length === 1) {
     state.days = fromPreset('bali');
