@@ -232,9 +232,11 @@ def main():
         gh('notice', f'samples={SAMPLES}'[:1500])
         gh('error', f'too few places ({stats["kept"]}) - schema change? not writing output')
         sys.exit(1)
+    import os
+    os.makedirs(os.path.dirname(dst) or '.', exist_ok=True)
     with open(dst, 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
-    print('wrote', dst)
+    gh('notice', f'wrote {dst} ({os.path.getsize(dst) // 1024} KB)')
 
 
 if __name__ == '__main__':
