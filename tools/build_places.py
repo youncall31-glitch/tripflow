@@ -439,7 +439,9 @@ CHAINS = re.compile(r"\b(mcd|mcdonald'?s?|kfc|burger king|starbucks|domino'?s|pi
                     r"texas chicken|ack fried|solaria|hokben|chatime|circle k|indomaret|alfamart|upnormal|richeese|"
                     r"wendy'?s|baskin|dunkin|janji jiwa|kopi kenangan|point coffee|fore coffee|excelso|gloria jean'?s|"
                     r"스타벅스|이디야|투썸|맥도날드|롯데리아|버거킹|파리바게뜨|뚜레쥬르|메가커피|메가mgc|빽다방|컴포즈|"
-                    r"할리스|탐앤탐스|폴바셋|공차|배스킨|던킨|맘스터치|bbq|bhc|교촌|굽네|서브웨이)", re.I)
+                    r"할리스|탐앤탐스|폴바셋|공차|배스킨|던킨|맘스터치|bbq|bhc|교촌|굽네|서브웨이|엔제리너스|커피빈|파스쿠찌|"
+                    r"twosome|ediya|lotteria|pascucci|paris ?baguette|tous ?les ?jours|mega ?coffee|paik'?s|compose coffee|"
+                    r"hollys|angel-?in-?us|coffee ?bean|tom ?n ?toms|cu |gs25|7-?eleven|seven ?eleven|emart24|mom'?s touch)", re.I)
 
 
 def a_raw(p):

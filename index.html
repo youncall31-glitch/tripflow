@@ -201,6 +201,10 @@ a{color:inherit;text-decoration:none;touch-action:manipulation}
 .tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
 .tools .label{width:100%;font-size:13px;font-weight:650;color:var(--text-3)}
 .daybar{margin-top:-4px;margin-bottom:8px}
+.trip-seg{margin:-2px 0 12px}
+.trip-seg button{height:42px;font-size:15px}
+.trip-seg .tcount{margin-left:6px;padding:1px 7px;border-radius:9px;background:var(--surface-2);font-size:12.5px;font-weight:800;color:var(--text-3)}
+.trip-seg button[aria-pressed="true"] .tcount{background:var(--accent-soft);color:var(--accent-ink)}
 .tab{font-size:15px}
 .region-chips{margin-bottom:8px}
 .map-key{display:flex;flex-wrap:wrap;gap:4px 14px;margin:12px 0 0;font-size:13px;font-weight:650;color:var(--text-2)}
@@ -657,7 +661,7 @@ const NOMINATIM = 'https://nominatim.openstreetmap.org';
 /* 프리셋: days[] 구조. 발리 일정은 사용자가 준 표(12/6~12/7) 기준. 좌표는 공개 자료로 확인(일부 근사치) */
 const BALI_VILLA = { name: 'Villa Baby (숙소)', category: '숙소', lat: -8.6880, lng: 115.1640 }; // 정확한 위치 미확인 → 핀을 끌어 수정
 const PRESETS = {
-  bali: { label: '🌴 발리 12/6–12/7 일정', days: [
+  bali: { trip: 'bali', label: '🌴 발리 12/6–12/7 일정', days: [
     { label: '12/6 (토)', stops: [
       { ...BALI_VILLA, time: '07:30', end: '08:30', note: '아침 식사 (숙소 제공 조식) · 위치는 핀을 끌어 실제 숙소로 옮겨 주세요' },
       { time: '10:10', end: '11:10', name: '빤따이 바투바락 (Pantai Batu Barak)', category: '여행스팟', note: '사진 촬영', lat: -8.84501, lng: 115.17430 },
@@ -675,21 +679,17 @@ const PRESETS = {
       { ...BALI_VILLA, time: '18:45', note: '숙소 복귀' },
     ] },
   ] },
-  jeju: { label: '🍊 제주 샘플', days: [{ label: '1일차', stops: [
+  jeju: { trip: 'jeju', label: '🍊 제주 샘플 동선', days: [{ label: '1일차', stops: [
     { time: '10:00', name: '애월 한담해안산책로', category: '여행스팟', note: '투명 카약 체험 & 해안 산책로 걷기', lat: 33.4628, lng: 126.3105 },
     { time: '12:00', name: '애월 흑돼지 점심', category: '식당', note: '제주 숙성 흑돼지 근고기 & 김치찌개', lat: 33.4652, lng: 126.3182 },
     { time: '14:00', name: '애월 오션뷰 카페', category: '카페', note: '아인슈페너 한 잔 & 바다 전망', lat: 33.4609, lng: 126.3091 },
     { time: '16:30', name: '협재해수욕장 & 금능해변', category: '여행스팟', note: '비양도 전망 일몰 감상 & 해변 산책', lat: 33.3941, lng: 126.2397 },
   ] }] },
-  kyoto: { label: '⛩️ 교토 샘플', days: [{ label: '1일차', stops: [
-    { time: '09:30', name: '기요미즈데라 (청수사)', category: '여행스팟', note: '본당 목조 무대 전망 & 산넨자카 산책', lat: 34.9949, lng: 135.7850 },
-    { time: '12:00', name: '기온 카네쇼 장어덮밥', category: '식당', note: '킨시동 (계란 지단 장어덮밥)', lat: 35.0037, lng: 135.7755 },
-    { time: '14:00', name: '아라비카 교토 히가시야마 (% 커피)', category: '카페', note: '교토 라떼 & 핸드드립', lat: 34.9986, lng: 135.7779 },
-    { time: '16:30', name: '후시미 이나리 신사 (여우신사)', category: '여행스팟', note: '센본토리이 붉은 도리이 터널', lat: 34.9671, lng: 135.7727 },
-  ] }] },
 };
-/* 발리 여행 지역 [id, 표시 이름, 블로그 검색어, [서, 남, 동, 북]] — tools/build_bali_places.py 의 REGIONS와 동일 */
-const REGIONS = [
+/* 여행지: 지역 [id, 표시 이름, 블로그 검색어, [서, 남, 동, 북]] — tools/build_places.py 의 지역 목록과 같은 순서·id */
+const mkRegions = rows => rows.map(([id, ko, q, b]) => ({ id, ko, q, b }));
+const TRIPS = {
+  bali: { label: '발리', emoji: '🌴', suffix: '발리', data: 'data/bali-places.json', bbox: [114.35, -9.0, 115.8, -7.95], center: [-8.62, 115.2], zoom: 10, regions: mkRegions([
   ['seminyak', '스미냑·르기안', '스미냑', [115.145, -8.715, 115.182, -8.665]],
   ['kuta', '꾸따', '꾸따', [115.160, -8.760, 115.190, -8.715]],
   ['canggu', '짱구', '짱구', [115.110, -8.665, 115.160, -8.615]],
@@ -707,14 +707,36 @@ const REGIONS = [
   ['east', '아메드·동부', '아메드', [115.480, -8.560, 115.720, -8.300]],
   ['lovina', '로비나', '로비나', [114.950, -8.200, 115.100, -8.130]],
   ['nusapenida', '누사페니다', '누사페니다', [115.420, -8.850, 115.630, -8.660]],
-].map(([id, ko, q, b]) => ({ id, ko, q, b }));
-const REGION_BY_ID = Object.fromEntries(REGIONS.map(r => [r.id, r]));
-const regionAt = (lat, lng) => REGIONS.find(r => lng >= r.b[0] && lng <= r.b[2] && lat >= r.b[1] && lat <= r.b[3]) || null;
+]) },
+  jeju: { label: '제주', emoji: '🍊', suffix: '제주', data: 'data/jeju-places.json', bbox: [126.10, 33.10, 127.0, 33.60], center: [33.38, 126.55], zoom: 10, regions: mkRegions([
+    ['jejusi', '제주시내·공항', '제주시', [126.450, 33.470, 126.580, 33.530]],
+    ['jocheon', '조천·함덕', '함덕', [126.580, 33.480, 126.730, 33.560]],
+    ['gujwa', '구좌·월정·세화', '월정리', [126.730, 33.450, 126.900, 33.570]],
+    ['seongsan', '성산·우도', '성산', [126.850, 33.380, 126.980, 33.530]],
+    ['pyoseon', '표선', '표선', [126.750, 33.300, 126.850, 33.420]],
+    ['namwon', '남원·위미', '남원', [126.620, 33.240, 126.750, 33.330]],
+    ['seogwipo', '서귀포시내', '서귀포', [126.500, 33.220, 126.620, 33.270]],
+    ['jungmun', '중문', '중문', [126.380, 33.220, 126.500, 33.270]],
+    ['andeok', '안덕·산방산', '산방산', [126.250, 33.200, 126.380, 33.300]],
+    ['daejeong', '대정·모슬포', '모슬포', [126.150, 33.190, 126.250, 33.300]],
+    ['hangyeong', '한경·고산', '고산', [126.150, 33.300, 126.230, 33.380]],
+    ['hallim', '한림·협재', '협재', [126.230, 33.360, 126.320, 33.430]],
+    ['aewol', '애월', '애월', [126.300, 33.420, 126.450, 33.500]],
+    ['hallasan', '한라산·중산간', '한라산', [126.400, 33.300, 126.700, 33.420]],
+  ]) },
+};
+const ALL_REGIONS = Object.values(TRIPS).flatMap(t => t.regions);
+let REGIONS = TRIPS.bali.regions; // 지금 여행지의 지역 (여행지를 바꾸면 갱신)
+const REGION_BY_ID = Object.fromEntries(ALL_REGIONS.map(r => [r.id, r]));
+const regionAt = (lat, lng) => ALL_REGIONS.find(r => lng >= r.b[0] && lng <= r.b[2] && lat >= r.b[1] && lat <= r.b[3]) || null;
 const regionKm2 = r => (r.b[2] - r.b[0]) * 111.32 * Math.cos(((r.b[1] + r.b[3]) / 2) * Math.PI / 180) * (r.b[3] - r.b[1]) * 110.57;
+const tripAt = (lat, lng) => Object.keys(TRIPS).find(k => { const b = TRIPS[k].bbox; return lng >= b[0] && lng <= b[2] && lat >= b[1] && lat <= b[3]; }) || null;
+/* 블로그 검색에 붙일 여행지 이름 (발리/제주), 해당 없으면 '' */
+const tripSuffix = (lat, lng) => { const t = tripAt(lat, lng); return t ? TRIPS[t].suffix : ''; };
 
 /* 예전 버전의 '손대지 않은 샘플'이면 발리 일정으로 자동 교체 */
-const OLD_SAMPLE_NAMES = new Set([...PRESETS.jeju.days[0].stops, ...PRESETS.kyoto.days[0].stops].map(x => x.name)
-  .concat(['우붓 몽키포레스트 & 왕궁', '너티 누리스 와룽 우붓', '뜨갈랄랑 라이스테라스 & 발리스윙']));
+const OLD_SAMPLE_NAMES = new Set(PRESETS.jeju.days[0].stops.map(x => x.name)
+  .concat(['기요미즈데라 (청수사)', '기온 카네쇼 장어덮밥', '아라비카 교토 히가시야마 (% 커피)', '후시미 이나리 신사 (여우신사)','우붓 몽키포레스트 & 왕궁', '너티 누리스 와룽 우붓', '뜨갈랄랑 라이스테라스 & 발리스윙']));
 
 /* OSM 태그 → 한국어 표시 */
 const KIND = { restaurant: '식당', fast_food: '패스트푸드', cafe: '카페', ice_cream: '아이스크림', attraction: '명소', viewpoint: '전망 포인트', museum: '박물관', gallery: '갤러리', zoo: '동물원', theme_park: '테마파크', aquarium: '아쿠아리움' };
@@ -793,11 +815,11 @@ function directionsUrl(a, b) {
 /* =====================================================================
    3. 상태 & 저장
    ===================================================================== */
+const newTripState = () => ({ days: [], dayId: null, activeId: null, areas: { sel: [], cat: '식당' } });
 const state = {
-  days: [], dayId: null, activeId: null,
+  trip: 'bali', trips: { bali: newTripState(), jeju: newTripState() }, // 여행지마다 일정·선택 지역을 따로 보관
   mode: 'driving', tab: 'route', filter: 'ALL',
   tile: 'google_road', theme: 'auto', blogSort: 'relevance', blogSortSet: false, sheet: 'half',
-  areas: { sel: [], cat: '식당' },          // 지역 탭: 고른 지역 id 목록, 분류
   nearbyBase: 'stop', me: null, nearbyAll: false, // 주변 탭: 'stop'(선택한 일정) | 'me'(내 위치)
   route: { key: '', legs: [], coords: null, status: 'idle' },   // status: idle | loading | ok | estimate
   nearby: { key: '', status: 'idle', items: [] },               // status: idle | loading | ok | error
@@ -810,6 +832,9 @@ const curDay = () => {
   if (!d) { d = state.days[0]; state.dayId = d.id; }
   return d;
 };
+/* state.days·dayId·activeId·areas = 지금 여행지의 값 (기존 로직은 그대로 '여행지 하나' 기준으로 동작) */
+const curTrip = () => state.trips[state.trip] || (state.trips[state.trip] = newTripState());
+for (const k of ['days', 'dayId', 'activeId', 'areas']) Object.defineProperty(state, k, { get: () => curTrip()[k], set: v => { curTrip()[k] = v; } });
 Object.defineProperty(state, 'stops', { get: () => curDay().stops, set: v => { curDay().stops = v; } });
 const multiDay = () => state.days.length > 1;
 const allStops = () => state.days.flatMap(d => d.stops);
@@ -823,19 +848,37 @@ const normStop = s => {
   return o;
 };
 
+const normDays = days => (Array.isArray(days) ? days : []).slice(0, 30).map(x => ({ id: String(x.id || 'd' + uid()), label: String(x.label || '').slice(0, 30) || '1일차', stops: (Array.isArray(x.stops) ? x.stops : []).filter(validStop).map(normStop) }));
+const normAreas = a => ({ sel: (a && Array.isArray(a.sel) ? a.sel : []).filter(id => REGION_BY_ID[id]).slice(0, 20), cat: a && ['식당', '카페', '여행스팟'].includes(a.cat) ? a.cat : '식당' });
 function loadSaved() {
   try {
     const d = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
-    if (!d || d.v !== 2) return null;
-    if (!Array.isArray(d.days) && Array.isArray(d.stops)) d.days = [{ id: 'd1', label: '1일차', stops: d.stops }]; // 이전 버전(하루짜리) 변환
-    if (!Array.isArray(d.days)) return null;
-    d.days = d.days.slice(0, 30).map(x => ({ id: String(x.id || 'd' + uid()), label: String(x.label || '').slice(0, 30) || '1일차', stops: (Array.isArray(x.stops) ? x.stops : []).filter(validStop).map(normStop) }));
+    if (!d || ![2, 3].includes(d.v)) return null;
+    if (d.v === 2) { // 이전 버전(여행지 구분 없음) → 장소 위치를 보고 발리/제주에 배정
+      if (!Array.isArray(d.days) && Array.isArray(d.stops)) d.days = [{ id: 'd1', label: '1일차', stops: d.stops }];
+      if (!Array.isArray(d.days)) return null;
+      const days = normDays(d.days), all = days.flatMap(x => x.stops);
+      const t = all.filter(x => tripAt(x.lat, x.lng) === 'jeju').length > all.length / 2 ? 'jeju' : 'bali';
+      d.trips = { bali: newTripState(), jeju: newTripState() };
+      Object.assign(d.trips[t], { days, dayId: d.dayId, activeId: d.activeId });
+      d.trips.bali.areas = normAreas(d.areas);
+      d.trip = t;
+      d.migrated = true;
+      return d;
+    }
+    const trips = {};
+    for (const k of Object.keys(TRIPS)) {
+      const x = (d.trips || {})[k] || {};
+      trips[k] = { days: normDays(x.days), dayId: x.dayId || null, activeId: x.activeId || null, areas: normAreas(x.areas) };
+    }
+    d.trips = trips;
+    if (!TRIPS[d.trip]) d.trip = 'bali';
     return d;
   } catch (e) { return null; }
 }
 function save() {
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify({ v: 2, days: state.days, dayId: state.dayId, activeId: state.activeId, mode: state.mode, tile: state.tile, theme: state.theme, blogSort: state.blogSort, blogSortSet: state.blogSortSet, areas: state.areas }));
+    localStorage.setItem(STORE_KEY, JSON.stringify({ v: 3, trip: state.trip, trips: state.trips, mode: state.mode, tile: state.tile, theme: state.theme, blogSort: state.blogSort, blogSortSet: state.blogSortSet }));
   } catch (e) { /* 사파리 개인정보 보호 모드 등 저장 불가 환경은 조용히 무시 */ }
 }
 const saveSoon = debounce(save, 250);
@@ -1232,16 +1275,16 @@ async function searchOsm(q, signal, center) {
    6-2. 발리 오픈 장소 데이터 (Overture Maps → GitHub Actions가 data/bali-places.json 생성)
    키·서버 없이 정적 파일만 사용. 처음 필요할 때 한 번만 내려받음
    ===================================================================== */
-const OPEN_DATA_URL = 'data/bali-places.json';
-const inBali = (lat, lng) => lat > -9.0 && lat < -7.95 && lng > 114.35 && lng < 115.8;
-let openData = null, openLoading = null;
-function loadOpenData() {
-  if (openData) return Promise.resolve(openData);
-  if (!openLoading) {
-    openLoading = fetchJSON(OPEN_DATA_URL, { timeout: 25000 }).then(d => {
+const openDataBy = {}, openLoadingBy = {};
+const curOpen = () => openDataBy[state.trip] || null;
+function loadOpenData(trip = state.trip) {
+  if (openDataBy[trip]) return Promise.resolve(openDataBy[trip]);
+  if (!TRIPS[trip]) return Promise.reject(new Error('no-trip'));
+  if (!openLoadingBy[trip]) {
+    openLoadingBy[trip] = fetchJSON(TRIPS[trip].data, { timeout: 25000 }).then(d => {
       const cats = d.cats || [], kinds = d.kinds || [];
       const dReg = d.regions || [];
-      openData = (d.p || []).map(r => {
+      const openData = (d.p || []).map(r => {
         const lat = r[1] / 1e5, lng = r[2] / 1e5;
         const rid = r[7] != null ? (r[7] >= 0 && dReg[r[7]] ? dReg[r[7]].id : '') : ((regionAt(lat, lng) || {}).id || '');
         return { name: String(r[0]), lat, lng, cat: cats[r[3]] || '여행스팟', kind: kinds[r[4]] || '', area: r[5] || '', pop: r[6] != null ? r[6] : null, rid, blog: r[8] != null ? r[8] : null,
@@ -1250,14 +1293,16 @@ function loadOpenData() {
       openData.hasPop = openData.some(x => x.pop != null);
       openData.hasBlog = openData.some(x => x.blog != null);
       openData.meta = { built: d.built || '', release: d.release || '' };
+      openDataBy[trip] = openData;
       return openData;
-    }).catch(err => { openLoading = null; throw err; });
+    }).catch(err => { openLoadingBy[trip] = null; throw err; });
   }
-  return openLoading;
+  return openLoadingBy[trip];
 }
-const wantsOpen = center => inBali(center.lat, center.lng) || allStops().some(x => inBali(x.lat, x.lng));
+/* 검색에 쓸 오픈 데이터 여행지: 지도 중심이 들어간 여행지, 아니면 지금 여행지 */
+const openTripFor = center => tripAt(center.lat, center.lng) || state.trip;
 async function searchOpen(q, center) {
-  const data = await loadOpenData();
+  const data = await loadOpenData(openTripFor(center));
   const nq = normName(q), toks = q.toLowerCase().split(/\s+/).map(normName).filter(Boolean);
   if (!nq) return [];
   const hits = [];
@@ -1275,7 +1320,7 @@ async function searchOpen(q, center) {
   return hits.slice(0, 40).map(([sc, dist, x]) => ({ exact: sc === 0, src: 'open', kid: '', url: '', name: x.name, lat: x.lat, lng: x.lng, category: x.cat, kind: x.kind, sub: x.area, dist }));
 }
 async function openNearby(s) {
-  const data = await loadOpenData(), food = [], spots = [];
+  const data = await loadOpenData(tripAt(s.lat, s.lng)), food = [], spots = [];
   for (const x of data) {
     if (Math.abs(x.lat - s.lat) > 0.02 || Math.abs(x.lng - s.lng) > 0.02) continue; // 대략 2km 박스로 먼저 거름
     const d = haversineKm(s, x) * 1000;
@@ -1325,7 +1370,7 @@ async function runSearch(raw) {
     const [kk, osm, open] = await Promise.all([
       kakaoKey() ? searchKakao(q, center).catch(err => ({ error: err })) : null,
       searchOsm(q, ctrl.signal, center).catch(() => null),
-      wantsOpen(center) ? searchOpen(q, center).catch(() => null) : null,
+      searchOpen(q, center).catch(() => null),
     ]);
     if (seq !== searchSeq || ctrl.signal.aborted) return;
     const kOk = kk && !kk.error ? kk : null;
@@ -1597,7 +1642,7 @@ async function fetchNearby(s, signal) {
   if (kakaoKey() && isKorea(s.lat, s.lng)) {
     try { return await kakaoNearby(s); } catch (e) { if (signal.aborted) throw e; }
   }
-  if (inBali(s.lat, s.lng)) {
+  if (tripAt(s.lat, s.lng)) {
     try { return await openNearby(s); } catch (e) { if (signal.aborted) throw e; } // 데이터가 아직 없으면 OSM으로
   }
   const at = `${s.lat.toFixed(6)},${s.lng.toFixed(6)}`;
@@ -1679,6 +1724,7 @@ const heatLevel = f => f < 0.1 ? 0 : f < 0.25 ? 1 : f < 0.5 ? 2 : f < 0.75 ? 3 :
 let areaLayer = null, areaErr = false, areaFitKey = '';
 const areaLimit = sel => Math.round(clamp(15 + sel.reduce((a, id) => a + regionKm2(REGION_BY_ID[id]), 0) * 0.5, 20, 150)); // 넓을수록 많이
 function areaItems() {
+  const openData = curOpen();
   if (!openData) return [];
   const sel = new Set(state.areas.sel), cat = state.areas.cat;
   const list = openData.filter(x => x.cat === cat && sel.has(x.rid));
@@ -1689,7 +1735,7 @@ function areaItems() {
   return top;
 }
 function ensureOpenData(after) {
-  if (openData) return true;
+  if (curOpen()) return true;
   loadOpenData().then(() => { areaErr = false; after(); }).catch(() => { areaErr = true; if (state.tab === 'areas') renderPanel(); });
   return false;
 }
@@ -1697,18 +1743,19 @@ const areaCatLabel = c => (AREA_CATS.find(x => x[0] === c) || [, c])[1];
 function areaPlaceBtns(x) {
   return `<button class="btn-sm primary" type="button" data-action="area-add" data-rank="${x.rank}">${icon('plus')}추가</button>
     <a class="btn-sm" href="${esc(googlePlaceUrl(x.name, x.lat, x.lng))}" target="_blank" rel="noopener">${icon('pin')}구글맵</a>
-    <a class="btn-sm" href="${esc(blogUrl(`${x.name} 발리`))}" target="_blank" rel="noopener">${icon('book')}블로그</a>`;
+    <a class="btn-sm" href="${esc(blogUrl(`${x.name} ${TRIPS[state.trip].suffix}`))}" target="_blank" rel="noopener">${icon('book')}블로그</a>`;
 }
 function areasHtml() {
   const chips = `<div class="filters region-chips" role="group" aria-label="지역 (여러 개 선택 가능)">${REGIONS.map(r =>
     `<button class="fchip" type="button" data-action="area-toggle" data-key="${r.id}" aria-pressed="${state.areas.sel.includes(r.id)}">${esc(r.ko)}</button>`).join('')}</div>`;
   const cats = `<div class="seg full sm" role="group" aria-label="분류">${AREA_CATS.map(([k, l]) =>
     `<button type="button" data-action="area-cat" data-key="${k}" aria-pressed="${state.areas.cat === k}">${l}</button>`).join('')}</div>`;
-  let h = `<div class="sec-head"><div class="title">발리 지역별 인기 장소<b>지역을 골라 보세요 (여러 개 가능)</b></div>${state.areas.sel.length ? `<button class="btn-sm" type="button" data-action="area-clear">선택 해제</button>` : ''}</div>${chips}${cats}`;
-  if (areaErr) return h + `<div class="empty">${icon('alert', 'big')}<h3>발리 장소 데이터를 불러오지 못했어요</h3><p>잠시 후 다시 시도해 주세요.</p><div class="acts"><button class="btn-sm primary" type="button" data-action="area-retry">${icon('refresh')}다시 시도</button></div></div>`;
+  const openData = curOpen(), T = TRIPS[state.trip];
+  let h = `<div class="sec-head"><div class="title">${T.emoji} ${T.label} 지역별 인기 장소<b>지역을 골라 보세요 (여러 개 가능)</b></div>${state.areas.sel.length ? `<button class="btn-sm" type="button" data-action="area-clear">선택 해제</button>` : ''}</div>${chips}${cats}`;
+  if (areaErr) return h + `<div class="empty">${icon('alert', 'big')}<h3>${T.label} 장소 데이터를 불러오지 못했어요</h3><p>데이터가 아직 만들어지는 중일 수 있어요. 잠시 후 다시 시도해 주세요.</p><div class="acts"><button class="btn-sm primary" type="button" data-action="area-retry">${icon('refresh')}다시 시도</button></div></div>`;
   if (!ensureOpenData(() => { if (state.tab === 'areas') { renderPanel(); renderAreas(true); } })) return h + '<div class="skel"></div>'.repeat(4);
   if (!state.areas.sel.length) {
-    const mine = [...new Set(allStops().map(x => (regionAt(x.lat, x.lng) || {}).id).filter(Boolean))];
+    const mine = [...new Set(allStops().map(x => (regionAt(x.lat, x.lng) || {}).id).filter(id => REGIONS.some(r => r.id === id)))];
     return h + `<div class="empty">${icon('pin', 'big')}<h3>어느 지역을 볼까요?</h3><p>위에서 지역을 누르면 지도에 인기 장소가 진한 빨강일수록 유명한 순으로 표시돼요.</p>${mine.length ? `<div class="acts"><button class="btn-sm primary" type="button" data-action="area-mine">${icon('route')}내 일정 지역 모두 보기</button></div>` : ''}</div>`;
   }
   const items = areaItems();
@@ -1732,7 +1779,7 @@ function renderAreas(fit) {
   if (!map) return;
   if (!areaLayer) areaLayer = L.layerGroup();
   areaLayer.clearLayers();
-  if (state.tab !== 'areas' || !openData || !state.areas.sel.length) { areaLayer.remove(); return; }
+  if (state.tab !== 'areas' || !curOpen() || !state.areas.sel.length) { areaLayer.remove(); return; }
   const sel = state.areas.sel.map(id => REGION_BY_ID[id]);
   sel.forEach(r => L.rectangle([[r.b[1], r.b[0]], [r.b[3], r.b[2]]], { color: '#dc2626', weight: 2, dashArray: '6 6', fillColor: '#dc2626', fillOpacity: 0.04, interactive: false }).addTo(areaLayer));
   const items = areaItems();
@@ -1772,7 +1819,7 @@ function renderPois() {
   poiLayer.clearLayers();
   if (state.tab !== 'nearby' || state.nearby.status !== 'ok') { poiLayer.remove(); return; }
   const c0 = nearbyCenter() || {};
-  const area = inBali(c0.lat || 0, c0.lng || 0) ? '발리' : keyword(c0.name || '').split(' ')[0];
+  const area = tripSuffix(c0.lat || 0, c0.lng || 0) || keyword(c0.name || '').split(' ')[0];
   filteredNearby().forEach(p => {
     const c = catOf(p.cat);
     p.marker = L.marker([p.lat, p.lng], {
@@ -1900,8 +1947,9 @@ function renderHeader() {
     const approx = state.route.status === 'estimate' ? '≈' : ''; // 직선거리 추정일 땐 ≈ 표시 (설명은 동선 탭 안내문)
     html = `<b>${n}곳</b><span class="dot">·</span><b>${approx}${fmtKm(km)}</b><span class="dot">·</span><b>${approx}${fmtDur(min)}</b>`;
   }
-  $('.summary').classList.toggle('compact', multiDay()); // 날짜 표시가 붙으면 이동수단 버튼은 아이콘만
-  $('#stats').innerHTML = (multiDay() ? `<b class="day-tag" title="${esc(curDay().label)}">${esc(curDay().label.split(' ')[0])}</b>` : '') + html;
+  $('.summary').classList.toggle('compact', true); // 날짜 표시가 붙으면 이동수단 버튼은 아이콘만
+  const T = TRIPS[state.trip];
+  $('#stats').innerHTML = `<b class="day-tag" title="${esc(T.label)} · ${esc(curDay().label)}">${T.emoji} ${multiDay() ? esc(curDay().label.split(' ')[0]) : esc(T.label)}</b>` + html;
   for (const b of document.querySelectorAll('[data-mode]')) b.setAttribute('aria-pressed', String(b.dataset.mode === state.mode));
   $('#cntRoute').textContent = n;
   const cn = $('#cntNearby'), nb = state.nearby;
@@ -1919,7 +1967,11 @@ function renderPanel() {
   el.innerHTML = state.tab === 'route' ? routeHtml() : state.tab === 'nearby' ? nearbyHtml() : state.tab === 'areas' ? areasHtml() : reviewsHtml();
 }
 
-const presetButtons = () => Object.entries(PRESETS).map(([k, p]) => `<button class="btn-sm" type="button" data-action="preset" data-key="${k}">${esc(p.label)}</button>`).join('');
+const presetButtons = () => Object.entries(PRESETS).filter(([, p]) => p.trip === state.trip).map(([k, p]) => `<button class="btn-sm" type="button" data-action="preset" data-key="${k}">${esc(p.label)}</button>`).join('');
+function tripBar() {
+  return `<div class="seg full trip-seg" role="group" aria-label="여행지">${Object.entries(TRIPS).map(([k, t]) =>
+    `<button type="button" data-action="trip" data-key="${k}" aria-pressed="${state.trip === k}">${t.emoji} ${t.label}<span class="tcount">${state.trips[k].days.reduce((a, d) => a + d.stops.length, 0)}</span></button>`).join('')}</div>`;
+}
 function dayBar() {
   return `<div class="filters daybar" role="group" aria-label="날짜">${state.days.map(d => {
     const on = d.id === curDay().id;
@@ -1934,11 +1986,11 @@ function dayTools() {
 function routeHtml() {
   const S = state.stops;
   if (!S.length) {
-    return dayBar() + `<div class="empty">${icon('pin', 'big')}<h3>${multiDay() ? esc(curDay().label) + ' 일정이 없어요' : '아직 일정이 없어요'}</h3><p>지도를 탭하거나 위에서 장소를 검색해<br>방문 시간과 함께 추가해 보세요.</p><div class="acts">${presetButtons()}${multiDay() ? dayTools() : ''}</div></div>`;
+    return tripBar() + dayBar() + `<div class="empty">${icon('pin', 'big')}<h3>${multiDay() ? esc(curDay().label) + ' 일정이 없어요' : '아직 일정이 없어요'}</h3><p>지도를 탭하거나 위에서 장소를 검색해<br>방문 시간과 함께 추가해 보세요.</p><div class="acts">${presetButtons()}${multiDay() ? dayTools() : ''}</div></div>`;
   }
   const legsOk = state.route.key === routeKey() && state.route.legs.length === S.length - 1;
   const walk = state.mode === 'walking';
-  let h = dayBar();
+  let h = tripBar() + dayBar();
   h += legsOk && state.route.status === 'estimate'
     ? `<div class="notice">${icon('alert')}<span>경로 서버가 응답하지 않아 직선거리로 어림잡았어요.</span><button class="btn-sm" type="button" data-action="retry-route">${icon('refresh')}다시 계산</button></div>`
     : '';
@@ -2029,7 +2081,14 @@ ${d.stops.map((x, i) => `    <Placemark><name>${xmlEsc(`${multiDay() ? d.label +
 
 const FILTERS = [['ALL', '전체'], ['식당', '식당'], ['카페', '카페'], ['여행스팟', '명소']];
 function googleNearbyLinks(s) {
-  if (isKorea(s.lat, s.lng)) return '';
+  if (isKorea(s.lat, s.lng)) { // 국내는 구글맵 정보가 빈약해서 네이버지도(방문자 리뷰·별점)로
+    const base = (regionAt(s.lat, s.lng) || {}).q || keyword(s.name || '');
+    const n = q => `https://map.naver.com/p/search/${encodeURIComponent(q)}`;
+    return `<div class="gnear"><span>네이버지도에서 리뷰 보며 찾기</span><div class="acts">
+      <a class="btn-sm" href="${esc(n(`${base} 맛집`))}" target="_blank" rel="noopener">${icon('food')}맛집</a>
+      <a class="btn-sm" href="${esc(n(`${base} 카페`))}" target="_blank" rel="noopener">${icon('cup')}카페</a>
+      <a class="btn-sm" href="${esc(n(`${base} 가볼만한곳`))}" target="_blank" rel="noopener">${icon('camera')}관광지</a></div></div>`;
+  }
   const at = `@${s.lat.toFixed(5)},${s.lng.toFixed(5)},16z`;
   const g = q => `https://www.google.com/maps/search/${encodeURIComponent(q)}/${at}`;
   return `<div class="gnear"><span>구글맵에서 별점 보며 찾기</span><div class="acts">
@@ -2061,7 +2120,7 @@ function nearbyHtml() {
     const n = k === 'ALL' ? nb.items.length : nb.items.filter(p => p.cat === k).length;
     return `<button class="fchip" type="button" data-action="filter" data-key="${k}" aria-pressed="${state.filter === k}">${label} ${n}</button>`;
   }).join('')}</div>`;
-  const list = filteredNearby(), area = inBali(s.lat, s.lng) ? '발리' : keyword(s.name).split(' ')[0];
+  const list = filteredNearby(), area = tripSuffix(s.lat, s.lng) || keyword(s.name).split(' ')[0];
   if (!list.length) {
     h += `<div class="empty"><p>${nb.items.length ? '이 분류에 해당하는 장소가 없어요.' : '반경 안에 지도에 등록된 장소가 없어요.'}</p></div>`;
   } else {
@@ -2096,9 +2155,9 @@ function reviewsHtml() {
   const s = activeStop();
   if (!s) return `<div class="empty">${icon('book', 'big')}<h3>기준 장소가 없어요</h3><p>동선에 장소를 추가하면 블로그·지도 후기를 바로 찾아볼 수 있어요.</p></div>`;
   const kw = keyword(s.name), kr = isKorea(s.lat, s.lng), rg = regionAt(s.lat, s.lng);
-  const near = rg ? rg.q : `${kw} 근처`; // 발리 지역이면 블로거들이 쓰는 지역명으로 ("짐바란 맛집")
+  const near = rg ? rg.q : `${kw} 근처`; // 여행지 지역이면 블로거들이 쓰는 지역명으로 ("짐바란 맛집", "애월 맛집")
   const tiles = [
-    [blogUrl(`${kw} ${inBali(s.lat, s.lng) ? '발리 ' : ''}후기`), 'book', `${kw} 후기`, '네이버 블로그'],
+    [blogUrl(`${kw} ${tripSuffix(s.lat, s.lng) && !kw.includes(tripSuffix(s.lat, s.lng)) ? tripSuffix(s.lat, s.lng) + ' ' : ''}후기`), 'book', `${kw} 후기`, '네이버 블로그'],
     [blogUrl(`${near} 맛집`), 'food', `${near} 맛집`, '네이버 블로그'],
     [blogUrl(`${near} 카페`), 'cup', `${near} 카페`, '네이버 블로그'],
     [blogUrl(rg ? `${near} 가볼만한곳` : `${kw} 코스`), 'route', rg ? `${near} 가볼만한곳` : '코스·동선 팁', '네이버 블로그'],
@@ -2171,7 +2230,7 @@ function setTab(tab) {
   renderPois();
   renderAreas(tab === 'areas');
   drawRoute();
-  if (tab !== 'areas' && state.areas.sel.length && openData) areaFitKey = ''; // 다시 들어오면 지역에 맞춰 보기
+  if (tab !== 'areas' && state.areas.sel.length && curOpen()) areaFitKey = ''; // 다시 들어오면 지역에 맞춰 보기
   $('#content').scrollTop = 0;
   if (!isSide() && state.sheet === 'collapsed') setSheet('half');
 }
@@ -2195,6 +2254,7 @@ function removeStop(id) {
 function loadPreset(key) {
   const p = PRESETS[key];
   if (!p) return;
+  if (p.trip !== state.trip) switchTrip(p.trip);
   const apply = () => { state.days = fromPreset(key); state.dayId = state.days[0].id; state.activeId = (state.days[0].stops[0] || {}).id || null; };
   if (allStops().length) withUndo(`${p.label}을(를) 불러왔어요`, apply);
   else { apply(); commit(); onActiveChanged(); }
@@ -2204,6 +2264,24 @@ function loadPreset(key) {
 function clearAll() {
   if (!state.stops.length) return;
   withUndo(multiDay() ? `${curDay().label} 일정을 비웠어요` : '일정을 모두 지웠어요', () => { state.stops = []; state.activeId = null; });
+}
+function switchTrip(key) {
+  if (!TRIPS[key] || key === state.trip) return;
+  removeTempPin();
+  if (map) map.closePopup();
+  state.trip = key;
+  REGIONS = TRIPS[key].regions;
+  curDay();
+  if (!activeStop()) state.activeId = state.stops.length ? state.stops[0].id : null;
+  state.nearby = { key: '', status: 'idle', items: [] };
+  state.nearbyBase = 'stop';
+  areaFitKey = '';
+  commit();
+  onActiveChanged();
+  renderAreas(true);
+  if (!isSide() && state.sheet === 'full') setSheet('half');
+  if (allStops().length) fitAll(); else { const c = TRIPS[key].center; map.setView(c, TRIPS[key].zoom); }
+  toast(`${TRIPS[key].emoji} ${TRIPS[key].label} 여행으로 바꿨어요`);
 }
 function setDay(id) {
   const d = state.days.find(x => x.id === id);
@@ -2364,9 +2442,9 @@ const GUIDE = [
   { t: '여행 동선을 한눈에', lead: '지도에서 하루 동선을 보고, 바로 고치고, 주변 인기 장소까지 찾는 앱이에요. 1분이면 다 볼 수 있어요.',
     stage: () => `<div class="gp">${gMap()}${gTop({ call: 3 })}${gCall(1, 68, 33)}<div class="g-sheet" style="--sh:46%">${gHead(0, { tabCall: 2 })}<div class="g-card on"><div class="g-row" style="margin:0"><span class="g-num on">1</span><span class="g-time">07:30</span><b style="display:inline;font-size:1.05em">Villa Baby</b></div></div></div></div>`,
     steps: ['<b>지도</b>: 번호 핀이 방문 순서, 파란 선이 실제 이동 경로예요.', '<b>아래 패널</b>: 동선·주변·지역·후기 네 가지 탭으로 나뉘어요.', '<b>검색창</b>: 가고 싶은 곳을 검색해서 바로 일정에 넣어요.'] },
-  { t: '날짜별 동선과 이동 시간', lead: '날짜 버튼으로 하루씩 보고, 장소 사이 이동 시간이 계획에 맞는지 바로 확인해요.',
-    stage: () => `<div class="gp">${gMap()}<div class="g-sheet" style="--sh:64%">${gHead(0)}<div class="g-row"><span class="g-chip">12/6 (토)</span><span class="g-chip on">12/7 (일)${C(1)}${T}</span><span class="g-chip">+ 날짜</span></div><div class="g-card"><div class="g-row" style="margin:0"><span class="g-num">2</span><span class="g-time">10:10</span><b style="display:inline;font-size:1.05em">바투바락</b></div></div><div class="g-leg">🚗 2.1km · 7분 <span class="g-ok">여유 23분</span></div><div class="g-leg">🚗 18km · 52분 <span class="g-bad">12분 부족${C(2)}</span><span class="g-btn" style="margin-left:auto">길찾기${C(3)}</span></div></div></div>`,
-    steps: ['<b>날짜 버튼</b>을 누르면 그날 일정과 지도가 바뀌어요. 선택한 날짜를 한 번 더 누르면 이름을 바꿀 수 있어요.', '장소 사이에 <b>이동 거리·시간</b>이 나와요. 초록 <b>여유</b>면 넉넉하고, 빨간 <b>부족</b>이면 시간을 조정하세요.', '<b>길찾기</b>를 누르면 구글맵(해외)·카카오맵(국내) 길안내가 열려요.'] },
+  { t: '여행지·날짜별 동선', lead: '발리와 제주 여행을 따로 짜고, 날짜별로 이동 시간이 계획에 맞는지 바로 확인해요.',
+    stage: () => `<div class="gp">${gMap()}<div class="g-sheet" style="--sh:72%">${gHead(0)}<div class="g-row"><span class="g-seg" style="margin:0;flex:1;justify-content:space-around"><span class="on">🌴 발리 12</span><span>🍊 제주${C(1)}</span></span></div><div class="g-row"><span class="g-chip">12/6 (토)</span><span class="g-chip on">12/7 (일)${C(2)}${T}</span><span class="g-chip">+ 날짜</span></div><div class="g-card"><div class="g-row" style="margin:0"><span class="g-num">2</span><span class="g-time">10:10</span><b style="display:inline;font-size:1.05em">바투바락</b></div></div><div class="g-leg">🚗 2.1km · 7분 <span class="g-ok">여유 23분</span></div><div class="g-leg">🚗 18km · 52분 <span class="g-bad">12분 부족${C(3)}</span><span class="g-btn" style="margin-left:auto">길찾기${C(4)}</span></div></div></div>`,
+    steps: ['맨 위 <b>🌴 발리 / 🍊 제주</b>로 여행지를 바꿔요. 여행지마다 일정·지역이 따로 저장돼요.', '<b>날짜 버튼</b>을 누르면 그날 일정과 지도가 바뀌어요. 선택한 날짜를 한 번 더 누르면 이름을 바꿀 수 있어요.', '장소 사이에 <b>이동 거리·시간</b>이 나와요. 초록 <b>여유</b>면 넉넉하고, 빨간 <b>부족</b>이면 시간을 조정하세요.', '<b>길찾기</b>를 누르면 구글맵(해외)·카카오맵(국내) 길안내가 열려요.'] },
   { t: '장소 추가하기', lead: '지도를 탭하거나 검색해서 찾은 곳을 시간과 함께 넣어요.',
     stage: () => `<div class="gp sm">${gMap(true, false)}${gTop()}<span class="g-pin red" style="left:62%;top:44%"></span>${gCall(1, 80, 38)}<div class="g-pop" style="left:22%;top:15%"><b>Menega Cafe</b><span class="g-btn pri">+ 동선에 추가${T}</span></div></div>${gArrow()}<div class="gp sm">${gMap(false, false)}<div class="g-scrim"></div><div class="g-dlg" style="top:14%"><b style="display:block;font-size:1.2em;margin-bottom:.6em">동선에 추가</b><div class="g-field"><span>장소 이름</span><div>Menega Cafe</div></div><div class="g-row"><div class="g-field" style="flex:1;margin:0"><span>시작</span><div>17:20</div></div><div class="g-field" style="flex:1;margin:0"><span>끝(선택)</span><div>19:40</div></div></div><span class="g-btn pri" style="display:block;text-align:center;margin-top:.4em">추가${C(2)}</span></div></div>`,
     steps: ['<b>지도를 탭</b>하면 빨간 핀이 꽂히고 장소 이름을 알려줘요. 위 <b>검색창</b>으로 찾아도 돼요.', '<b>동선에 추가</b>를 누르고 시작·끝 시간을 넣으면 시간순으로 자리 잡아요.', '이미 있는 일정과 시간이 겹치면 <b>뒤 일정을 미룰지</b> 물어봐요.'] },
@@ -2375,8 +2453,8 @@ const GUIDE = [
     steps: ['<b>시간 칸</b>을 눌러 바꾸면 자동으로 다시 정렬돼요. 늦추면 <b>뒤 일정도 같이 밀기</b>를 한 번에 할 수 있어요.', '선택한 장소의 <b>노란 테두리 핀을 길게 눌러 끌면</b> 위치가 옮겨져요. (숙소처럼 위치가 정확하지 않을 때)', '바꾼 뒤 나오는 알림에서 <b>밀기·되돌리기</b>를 고를 수 있어요. 이름·메모는 <b>수정</b>에서 바꿔요.'] },
   { t: '시간이 붕 떴을 때: 주변', lead: '일정 장소 또는 내 현재 위치 기준으로 근처 식당·카페·명소를 찾아요.',
     stage: () => `<div class="gp">${gMap(true, false)}<span class="g-heat" style="left:66%;top:30%;--h:#ea580c;--d:1.5em"></span><span class="g-heat" style="left:48%;top:20%;--h:#9333ea;--d:1.5em"></span><div class="g-sheet" style="--sh:64%">${gHead(1)}<div class="g-row"><span class="g-seg" style="margin:0"><span>일정 기준</span><span class="on">내 위치${C(1)}${T}</span></span></div><div class="g-note">⏱ 다음 일정 14:40까지 <b>1시간 30분</b> · 걸어서 다녀올 수 있는 2.3km 이내만 보여요${C(2)}</div><div class="g-row" style="flex-wrap:wrap"><span style="font-size:.9em;font-weight:700;color:var(--text-3)">구글맵에서 별점 보며 찾기</span><span class="g-btn">맛집${C(3)}</span><span class="g-btn">카페</span><span class="g-btn">관광지</span></div></div></div>`,
-    steps: ['<b>내 위치</b>를 누르면 지금 있는 곳 근처를 보여줘요. (일정 기준은 선택한 일정 장소 주변)', '<b>다음 일정까지 남은 시간</b>을 계산해서, 다녀올 수 있는 거리 안의 곳만 골라줘요.', '<b>구글맵 버튼</b>으로 그 자리 주변 맛집·카페·관광지를 별점과 리뷰 수까지 확인해요.'] },
-  { t: '지역별 인기 장소', lead: '발리를 17개 지역으로 나눴어요. 지역을 고르면 유명한 곳일수록 진한 빨강으로 보여요.',
+    steps: ['<b>내 위치</b>를 누르면 지금 있는 곳 근처를 보여줘요. (일정 기준은 선택한 일정 장소 주변)', '<b>다음 일정까지 남은 시간</b>을 계산해서, 다녀올 수 있는 거리 안의 곳만 골라줘요.', '<b>구글맵 버튼</b>(제주는 <b>네이버지도</b>)으로 그 자리 주변 맛집·카페·관광지를 별점·리뷰와 함께 확인해요.'] },
+  { t: '지역별 인기 장소', lead: '발리는 17개, 제주는 14개 지역으로 나눴어요. 지역을 고르면 유명한 곳일수록 진한 빨강으로 보여요.',
     stage: () => `<div class="gp">${gMap(false, false)}<div class="g-box" style="left:18%;top:7%;width:62%;height:28%"></div>${[[30, 14, 0], [52, 20, 0], [64, 12, 1], [40, 26, 1], [70, 28, 2], [26, 31, 2], [58, 31, 3], [46, 10, 3], [74, 18, 4], [34, 20, 4]].map(([x, y, l]) => `<span class="g-heat" style="left:${x}%;top:${y}%;--h:${HEAT[l]};--d:${[1.6, 1.35, 1.15, 1, .85][l]}em"></span>`).join('')}<span class="g-pin" style="left:44%;top:17%">3</span><span class="g-pin on" style="left:66%;top:24%">4</span><div class="g-sheet" style="--sh:62%">${gHead(2)}<div class="g-row"><span class="g-chip on">짐바란${C(1)}${T}</span><span class="g-chip on">울루와뚜</span><span class="g-chip">우붓</span></div><div class="g-row"><span class="g-seg" style="margin:0;flex:1;justify-content:space-around"><span class="on">식당</span><span>카페</span><span>관광지${C(2)}</span></span></div><div class="g-legend"><span style="display:inline-grid;place-items:center;width:1.4em;height:1.4em;border-radius:.45em;background:#1d4ed8;color:#fff;font-size:.8em">1</span>내 일정 · 덜 유명<i></i>유명${C(3)}</div><div class="g-rank"><i style="--h:#7f1d1d">1</i><div><b>Menega Cafe</b><small>해산물 · 블로그 950건</small></div></div><div class="g-rank"><i style="--h:#b91c1c">2</i><div><b>Sundara</b><small>식당 · 블로그 410건</small></div></div></div></div>`,
     steps: ['<b>지역 버튼</b>을 누르면 지도에 그 지역 경계와 인기 장소가 표시돼요. 여러 지역을 고르면 범위와 개수가 넓이만큼 늘어나요.', '<b>식당·카페·관광지</b>를 바꿔 가며 볼 수 있어요.', '<b>빨간 점은 진하고 클수록 유명</b>해요. 파란 네모 번호는 내 일정이에요. 순위는 공개 지도 데이터 인지도와 네이버 블로그 언급 수를 합친 거예요.'] },
   { t: '후기 찾아보기', lead: '선택한 일정 장소의 블로그 후기와 지도 리뷰를 한 번에 열어요.',
@@ -2505,10 +2583,11 @@ function bindUI() {
       else if (action === 'retry-route') computeRoute(true);
       else if (action === 'kakao') openKakaoDialog();
       else if (action === 'day') setDay(key);
+      else if (action === 'trip') switchTrip(key);
       else if (action === 'area-toggle') toggleArea(key);
       else if (action === 'area-cat') { state.areas.cat = key; saveSoon(); renderPanel(); renderAreas(); $('#content').scrollTop = 0; }
       else if (action === 'area-clear') { state.areas.sel = []; saveSoon(); renderPanel(); renderAreas(); }
-      else if (action === 'area-mine') { state.areas.sel = [...new Set(allStops().map(x => (regionAt(x.lat, x.lng) || {}).id).filter(Boolean))]; saveSoon(); renderPanel(); renderAreas(true); }
+      else if (action === 'area-mine') { state.areas.sel = [...new Set(allStops().map(x => (regionAt(x.lat, x.lng) || {}).id).filter(id => REGIONS.some(r => r.id === id)))]; saveSoon(); renderPanel(); renderAreas(true); }
       else if (action === 'area-retry') { areaErr = false; renderPanel(); }
       else if (action === 'area-add') { const x = areaItems()[+a.dataset.rank - 1]; if (x) addFromPlace({ name: x.name, cat: x.cat, kind: x.kind, lat: x.lat, lng: x.lng }); }
       else if (action === 'nb-base') { if (key === 'me') useMyLocation(); else { state.nearbyBase = 'stop'; loadNearby(); renderPanel(); } }
@@ -2577,23 +2656,24 @@ function bindUI() {
    ===================================================================== */
 function init() {
   const saved = loadSaved();
-  const untouchedSample = saved && saved.days.length === 1 && saved.days[0].stops.length > 0 && saved.days[0].stops.every(x => OLD_SAMPLE_NAMES.has(x.name));
   if (saved) {
-    state.days = saved.days;
-    state.dayId = saved.dayId;
-    state.activeId = saved.activeId;
+    state.trips = saved.trips;
+    state.trip = saved.trip;
     if (saved.mode === 'walking') state.mode = 'walking';
     if (TILES[saved.tile]) state.tile = saved.tile;
     if (['auto', 'light', 'dark'].includes(saved.theme)) state.theme = saved.theme;
     if (saved.blogSortSet && ['recent', 'relevance'].includes(saved.blogSort)) { state.blogSort = saved.blogSort; state.blogSortSet = true; }
-    if (saved.areas && Array.isArray(saved.areas.sel)) state.areas = { sel: saved.areas.sel.filter(id => REGION_BY_ID[id]).slice(0, 17), cat: ['식당', '카페', '여행스팟'].includes(saved.areas.cat) ? saved.areas.cat : '식당' };
   }
-  if (!saved || untouchedSample || !allStops().length && saved.days.length === 1) {
-    state.days = fromPreset('bali');
-    state.dayId = state.days[0].id;
-    state.activeId = state.days[0].stops[0].id;
+  // 발리: 일정이 없거나 이전 버전의 손대지 않은 샘플이면 발리 실제 일정으로
+  const bali = state.trips.bali, jeju = state.trips.jeju;
+  const sampleOnly = t => t.days.length === 1 && t.days[0].stops.length > 0 && t.days[0].stops.every(x => OLD_SAMPLE_NAMES.has(x.name));
+  if (saved && saved.migrated && (sampleOnly(bali) || sampleOnly(jeju))) { if (sampleOnly(jeju)) state.trips.jeju = newTripState(); if (sampleOnly(bali)) bali.days = []; state.trip = 'bali'; }
+  if (!state.trips.bali.days.some(d => d.stops.length) && state.trips.bali.days.length <= 1) {
+    const days = fromPreset('bali');
+    Object.assign(state.trips.bali, { days, dayId: days[0].id, activeId: days[0].stops[0].id });
   }
-  state.days.forEach(d => d.stops.sort((a, b) => a.time.localeCompare(b.time)));
+  for (const t of Object.values(state.trips)) t.days.forEach(d => d.stops.sort((a, b) => a.time.localeCompare(b.time)));
+  REGIONS = TRIPS[state.trip].regions;
   curDay();
   sortStops();
   if (!activeStop()) state.activeId = state.stops.length ? state.stops[0].id : null;
@@ -2609,7 +2689,7 @@ function init() {
   renderHeader();
   renderPanel();
   setSheet('half', false);
-  fitAll(false);
+  if (allStops().length) fitAll(false); else map.setView(TRIPS[state.trip].center, TRIPS[state.trip].zoom);
   scheduleRoute(0);
   if (kakaoKey()) setTimeout(() => loadKakao().catch(() => {}), 1200);
   if (!guideHidden()) setTimeout(openGuide, 350); // 처음엔 사용법부터 ('다시 보지 않기' 전까지 매번)
