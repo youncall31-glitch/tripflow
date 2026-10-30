@@ -177,7 +177,7 @@ a{color:inherit;text-decoration:none;touch-action:manipulation}
 .seg.full button{flex:1}
 .seg.sm button{height:34px;font-size:13.5px}
 .tabs{display:flex;padding:0 6px;border-bottom:1px solid var(--line)}
-.tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:48px;margin-bottom:-1px;border-bottom:3px solid transparent;font-size:15.5px;font-weight:650;color:var(--text-3)}
+.tab{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;height:48px;margin-bottom:-1px;border-bottom:3px solid transparent;font-size:15.5px;font-weight:650;color:var(--text-3)}
 .tab[aria-selected="true"]{color:var(--accent-ink);border-bottom-color:var(--accent)}
 .count{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:var(--surface-2);color:var(--text-2);font-size:12.5px;font-weight:700}
 .tab[aria-selected="true"] .count{background:var(--accent-soft);color:var(--accent-ink)}
@@ -393,6 +393,9 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
 .g-li{display:flex;align-items:center;gap:.5em;padding:.45em .4em;font-size:.95em}
 .g-li i{display:grid;place-items:center;flex:none;width:1.5em;height:1.5em;border-radius:50%;background:#111827;color:#fff;font-style:normal;font-weight:800;font-size:.85em}
 .g-li small{margin-left:auto;color:var(--text-3)}
+.g-wpin{position:absolute;display:grid;place-items:center;width:2.2em;height:2.2em;margin:-1.1em 0 0 -1.1em;font-weight:900;border:.18em solid #fff;border-radius:50%;background:#f59e0b;color:#fff;font-size:.95em;box-shadow:0 .15em .4em rgba(0,0,0,.35)}
+.g-wpin.done{width:1.5em;height:1.5em;margin:-.75em 0 0 -.75em;background:#b45309;opacity:.8;font-size:.8em}
+.g-btn.wish{background:#fef3c7;color:#92400e}
 .g-fab{position:absolute;right:.9em;width:2.6em;height:2.6em;border-radius:50%;background:var(--surface);box-shadow:0 .2em .6em rgba(0,0,0,.18)}
 .g-fab svg{width:1.4em;height:1.4em;margin:.6em;fill:none;stroke:var(--text);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .g-pin{position:absolute;display:grid;place-items:center;width:2.2em;height:2.2em;margin:-1.1em 0 0 -1.1em;border:.22em solid #fff;border-radius:.7em;background:#1d4ed8;color:#fff;font-size:1em;font-weight:800;box-shadow:0 .2em .5em rgba(0,0,0,.3)}
@@ -474,6 +477,19 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
 .mk.on{box-shadow:0 0 0 4px #facc15,0 3px 12px rgba(0,0,0,.4);transform:scale(1.15)}
 .poi{display:grid;place-items:center;width:30px;height:30px;border:2.5px solid #fff;border-radius:50%;background:var(--m);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .poi .ic{width:15px;height:15px;stroke-width:2.4}
+.wpin{display:grid;place-items:center;width:30px;height:30px;border:2.5px solid #fff;border-radius:50%;background:#f59e0b;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.wpin .ic{width:17px;height:17px;fill:#fff;stroke:#fff;stroke-width:1}
+.wpin.done{width:24px;height:24px;background:#b45309;opacity:.75}
+.wpin.done .ic{width:13px;height:13px}
+.wpin.on{box-shadow:0 0 0 4px rgba(245,158,11,.45),0 2px 8px rgba(0,0,0,.4)}
+.wstar{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#f59e0b;color:#fff}
+.wstar .ic{width:18px;height:18px;fill:#fff;stroke:#fff;stroke-width:1}
+.wstar.done{background:var(--surface-2);color:#b45309}.wstar.done .ic{fill:#f59e0b;stroke:#f59e0b}
+.btn-sm.wish .ic{stroke:#d97706}
+.btn-sm.wish.on{background:#fef3c7;color:#92400e;border-color:#fcd34d}.btn-sm.wish.on .ic{fill:#f59e0b;stroke:#f59e0b}
+:root[data-theme="dark"] .btn-sm.wish.on{background:#422006;color:#fcd34d;border-color:#92400e}
+.in-route{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9px;background:var(--accent-soft);color:var(--accent-ink);font-size:12.5px;font-weight:700}
+.k-wish{display:inline-grid;place-items:center;width:16px;height:16px;border:1.5px solid #fff;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
 .tpin{width:30px;height:30px;border:3px solid #fff;border-radius:50% 50% 50% 0;background:#e11d48;box-shadow:0 3px 10px rgba(0,0,0,.35);transform:rotate(-45deg)}
 .me{width:20px;height:20px;border:3px solid #fff;border-radius:50%;background:#2563eb;box-shadow:0 0 0 7px rgba(37,99,235,.25),0 2px 6px rgba(0,0,0,.3)}
 .leaflet-container{font-family:var(--font);background:var(--surface-3)}
@@ -536,6 +552,7 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
   <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
   <symbol id="i-map" viewBox="0 0 24 24"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2.8 2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9L12 2.8z"/></symbol>
   <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.6 2.3c-.7.4-1.2 1-1.2 1.8v.4M12 17.2h.01"/></symbol>
   <symbol id="i-hand" viewBox="0 0 24 24"><path d="M9 11.5V5a1.5 1.5 0 0 1 3 0v5.5m0-1.5a1.5 1.5 0 0 1 3 0v2m0-1a1.5 1.5 0 0 1 3 0v4.5a6.5 6.5 0 0 1-6.5 6.5H11a6 6 0 0 1-4.6-2.2l-3-3.7a1.6 1.6 0 0 1 2.4-2.1L9 15.5"/></symbol>
 </svg>
@@ -584,6 +601,7 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
         <button class="tab" role="tab" id="tab-nearby" data-tab="nearby" aria-selected="false" aria-controls="content">주변 <span class="count" id="cntNearby" hidden></span></button>
         <button class="tab" role="tab" id="tab-areas" data-tab="areas" aria-selected="false" aria-controls="content">지역</button>
         <button class="tab" role="tab" id="tab-reviews" data-tab="reviews" aria-selected="false" aria-controls="content">후기</button>
+        <button class="tab" role="tab" id="tab-wish" data-tab="wish" aria-selected="false" aria-controls="content">찜 <span class="count" id="cntWish" hidden></span></button>
       </div>
     </div>
     <div class="content" id="content" role="tabpanel" aria-labelledby="tab-route" tabindex="-1"></div>
@@ -868,7 +886,7 @@ function directionsUrl(a, b) {
 /* =====================================================================
    3. 상태 & 저장
    ===================================================================== */
-const newTripState = () => ({ days: [], dayId: null, activeId: null, areas: { sel: [], cat: '식당' } });
+const newTripState = () => ({ days: [], dayId: null, activeId: null, areas: { sel: [], cat: '식당' }, wish: [] });
 const state = {
   trip: 'bali', trips: { bali: newTripState(), jeju: newTripState() }, // 여행지마다 일정·선택 지역을 따로 보관
   mode: 'driving', tab: 'route', filter: 'ALL',
@@ -887,7 +905,7 @@ const curDay = () => {
 };
 /* state.days·dayId·activeId·areas = 지금 여행지의 값 (기존 로직은 그대로 '여행지 하나' 기준으로 동작) */
 const curTrip = () => state.trips[state.trip] || (state.trips[state.trip] = newTripState());
-for (const k of ['days', 'dayId', 'activeId', 'areas']) Object.defineProperty(state, k, { get: () => curTrip()[k], set: v => { curTrip()[k] = v; } });
+for (const k of ['days', 'dayId', 'activeId', 'areas', 'wish']) Object.defineProperty(state, k, { get: () => curTrip()[k], set: v => { curTrip()[k] = v; } });
 Object.defineProperty(state, 'stops', { get: () => curDay().stops, set: v => { curDay().stops = v; } });
 const multiDay = () => state.days.length > 1;
 const allStops = () => state.days.flatMap(d => d.stops);
@@ -902,6 +920,12 @@ const normStop = s => {
 };
 
 const normDays = days => (Array.isArray(days) ? days : []).slice(0, 30).map(x => ({ id: String(x.id || 'd' + uid()), label: String(x.label || '').slice(0, 30) || '1일차', stops: (Array.isArray(x.stops) ? x.stops : []).filter(validStop).map(normStop) }));
+/* 꼭 가고 싶은 곳(찜): 동선과 따로 보관, 나중에 골라서 동선에 넣음 */
+const normWish = list => (Array.isArray(list) ? list : []).filter(w => w && Number.isFinite(+w.lat) && Number.isFinite(+w.lng) && typeof w.name === 'string').slice(0, 200).map(w => {
+  const o = { id: String(w.id || 'w' + uid()), name: w.name.slice(0, 80) || '가고 싶은 곳', lat: +w.lat, lng: +w.lng, category: CATS[w.category] ? w.category : '여행스팟', note: String(w.note || '').slice(0, 120) };
+  if (/^\d{1,20}$/.test(String(w.kid || ''))) o.kid = String(w.kid);
+  return o;
+});
 const normAreas = a => ({ sel: (a && Array.isArray(a.sel) ? a.sel : []).filter(id => REGION_BY_ID[id]).slice(0, 20), cat: a && ['식당', '카페', '여행스팟'].includes(a.cat) ? a.cat : '식당' });
 function loadSaved() {
   try {
@@ -922,7 +946,7 @@ function loadSaved() {
     const trips = {};
     for (const k of Object.keys(TRIPS)) {
       const x = (d.trips || {})[k] || {};
-      trips[k] = { days: normDays(x.days), dayId: x.dayId || null, activeId: x.activeId || null, areas: normAreas(x.areas) };
+      trips[k] = { days: normDays(x.days), dayId: x.dayId || null, activeId: x.activeId || null, areas: normAreas(x.areas), wish: normWish(x.wish) };
     }
     d.trips = trips;
     if (!TRIPS[d.trip]) d.trip = 'bali';
@@ -946,6 +970,7 @@ function commit() {
   sortStops();
   if (!activeStop()) state.activeId = state.stops.length ? state.stops[0].id : null;
   renderMarkers();
+  renderWish();
   renderHeader();
   renderPanel();
   scheduleRoute();
@@ -953,13 +978,13 @@ function commit() {
 }
 /* 되돌리기 가능한 변경 */
 function withUndo(msg, mutate) {
-  const snap = JSON.stringify({ days: state.days, dayId: state.dayId, activeId: state.activeId });
+  const snap = JSON.stringify({ days: state.days, dayId: state.dayId, activeId: state.activeId, wish: state.wish });
   mutate();
   commit();
   onActiveChanged();
   toast(msg, {
     action: '되돌리기',
-    onAction: () => { const d = JSON.parse(snap); state.days = d.days; state.dayId = d.dayId; state.activeId = d.activeId; commit(); onActiveChanged(); fitAll(); },
+    onAction: () => { const d = JSON.parse(snap); state.days = d.days; state.dayId = d.dayId; state.activeId = d.activeId; state.wish = d.wish; commit(); onActiveChanged(); fitAll(); },
   });
 }
 
@@ -1163,10 +1188,14 @@ function showPin(d, loading) {
   el.innerHTML = `<div class="pop-title">${loading ? '<span class="spinner"></span> 위치 확인 중…' : esc(d.name)}</div>
     ${d.sub ? `<div class="pop-sub">${esc(d.sub)}</div>` : ''}
     ${d.kind ? `<div class="pop-sub">${esc(d.kind)}</div>` : ''}
-    <div class="acts"><button class="btn-sm primary" type="button"${loading ? ' disabled' : ''}>${icon('plus')}동선에 추가</button>${d.url ? `<a class="btn-sm" href="${esc(d.url)}" target="_blank" rel="noopener">${icon('pin')}카카오맵</a>` : ''}</div>`;
-  el.querySelector('button').addEventListener('click', () => {
+    <div class="acts"><button class="btn-sm primary" type="button" data-add${loading ? ' disabled' : ''}>${icon('plus')}동선에 추가</button>${wishBtn(d, loading)}${d.url ? `<a class="btn-sm" href="${esc(d.url)}" target="_blank" rel="noopener">${icon('pin')}카카오맵</a>` : ''}</div>`;
+  el.querySelector('[data-add]').addEventListener('click', () => {
     map.closePopup();
     openStopDialog('add', { ...d, time: suggestTime(null) });
+  });
+  el.querySelector('[data-wish]').addEventListener('click', () => {
+    map.closePopup();
+    if (toggleWish(d)) removeTempPin();
   });
   if (!tempMarker) {
     tempMarker = L.marker([d.lat, d.lng], { icon: L.divIcon({ className: '', html: '<div class="tpin"></div>', iconSize: [30, 30], iconAnchor: [15, 34], popupAnchor: [0, -34] }), zIndexOffset: 3000, keyboard: false });
@@ -1838,7 +1867,7 @@ function ensureOpenData(after) {
 }
 const areaCatLabel = c => (AREA_CATS.find(x => x[0] === c) || [, c])[1];
 function areaPlaceBtns(x) {
-  return `<button class="btn-sm primary" type="button" data-action="area-add" data-rank="${x.rank}">${icon('plus')}추가</button>
+  return `<button class="btn-sm primary" type="button" data-action="area-add" data-rank="${x.rank}">${icon('plus')}추가</button>${wishBtn(placeWish(x), false, `data-action="area-wish" data-rank="${x.rank}"`)}
     <a class="btn-sm" href="${esc(googlePlaceUrl(x.name, x.lat, x.lng))}" target="_blank" rel="noopener">${icon('pin')}구글맵</a>
     <a class="btn-sm" href="${esc(blogUrl(`${x.name} ${TRIPS[state.trip].suffix}`))}" target="_blank" rel="noopener">${icon('book')}블로그</a>`;
 }
@@ -1902,13 +1931,119 @@ function areaPopup(x) {
   el.innerHTML = `<div class="pop-title">${esc(x.name)}</div>
     <div class="pop-sub"><b style="color:${HEAT[Math.min(x.lvl, 2)]}">${rg ? esc(rg.ko) + ' ' : ''}${areaCatLabel(x.cat)} ${x.rank}위</b> · ${esc(x.kind)}${x.blog != null ? ` · 블로그 ${x.blog.toLocaleString()}건` : ''}</div>
     <div class="acts">${areaPlaceBtns(x)}</div>`;
-  el.addEventListener('click', e => { if (e.target.closest('[data-action="area-add"]')) { map.closePopup(); addFromPlace({ name: x.name, cat: x.cat, kind: x.kind, lat: x.lat, lng: x.lng }); } });
+  el.addEventListener('click', e => {
+    if (e.target.closest('[data-action="area-add"]')) { map.closePopup(); addFromPlace({ name: x.name, cat: x.cat, kind: x.kind, lat: x.lat, lng: x.lng }); }
+    else if (e.target.closest('[data-wish]')) { map.closePopup(); toggleWish(placeWish(x)); }
+  });
   return el;
 }
 function toggleArea(id) {
   const sel = state.areas.sel, i = sel.indexOf(id);
   if (i >= 0) sel.splice(i, 1); else sel.push(id);
   saveSoon(); renderPanel(); renderAreas();
+}
+
+/* =====================================================================
+   꼭 가고 싶은 곳(찜): 지도에 별 핀으로 늘 표시, 동선 추가는 나중에 따로
+   ===================================================================== */
+let wishLayer = null, wishMarkers = new Map();
+const nearM = (a, b) => haversineKm(a, b) < 0.06;
+const placeWish = p => p ? { name: p.name, lat: p.lat, lng: p.lng, category: p.cat || p.category || '여행스팟', note: [p.kind, p.cuisine].filter(Boolean).join(' · ') || p.note || '', kid: p.kid } : null;
+const findWish = d => d && state.wish.find(w => nearM(w, d) && (w.name === d.name || !d.name || haversineKm(w, d) < 0.015));
+function wishInRoute(w) {
+  if (!w) return null;
+  for (const day of state.days) { const stop = day.stops.find(x => nearM(x, w)); if (stop) return { day, stop }; }
+  return null;
+}
+function wishBtn(d, disabled = false, attrs = '') {
+  const on = !!findWish(d);
+  return `<button class="btn-sm wish${on ? ' on' : ''}" type="button" data-wish ${attrs}${disabled ? ' disabled' : ''} aria-pressed="${on}">${icon('star')}${on ? '찜함' : '찜'}</button>`;
+}
+function toggleWish(d) {
+  if (!d) return false;
+  const ex = findWish(d);
+  if (ex) {
+    withUndo(`'${ex.name}' 찜을 풀었어요`, () => { state.wish = state.wish.filter(w => w !== ex); });
+    return false;
+  }
+  if (state.wish.length >= 200) { toast('찜은 여행지마다 200곳까지예요'); return false; }
+  const w = normWish([{ ...d, id: 'w' + uid() }])[0];
+  state.wish.push(w);
+  commit();
+  toast(`★ '${w.name}' 찜했어요. 동선에는 나중에 넣을 수 있어요`, { action: '찜 목록', onAction: () => setTab('wish') });
+  return true;
+}
+function addWishToRoute(id) {
+  const w = state.wish.find(x => x.id === id);
+  if (!w) return;
+  if (map) map.closePopup();
+  openStopDialog('add', { name: w.name, category: w.category, note: w.note, lat: w.lat, lng: w.lng, kid: w.kid, time: suggestTime(activeStop()) });
+}
+function focusWish(id) {
+  const w = state.wish.find(x => x.id === id), m = wishMarkers.get(id);
+  if (!w) return;
+  if (!isSide() && state.sheet === 'full') setSheet('half');
+  focusPoint([w.lat, w.lng], Math.max(map.getZoom(), 15));
+  afterMove(() => { if (m && wishLayer && wishLayer.hasLayer(m)) m.openPopup(); });
+}
+function renderWish() {
+  if (!map) return;
+  if (!wishLayer) wishLayer = L.layerGroup().addTo(map);
+  wishLayer.clearLayers();
+  wishMarkers = new Map();
+  state.wish.forEach(w => {
+    const done = !!wishInRoute(w), sz = done ? 24 : 30;
+    const m = L.marker([w.lat, w.lng], {
+      icon: L.divIcon({ className: '', html: `<div class="wpin${done ? ' done' : ''}">${icon('star')}</div>`, iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2], popupAnchor: [0, -sz / 2] }),
+      title: `★ ${w.name}`, zIndexOffset: done ? -2000 : -500, // 내 일정 핀 아래, 인기 장소 점 위
+    }).bindPopup(() => wishPopup(w.id), popupOpts('wish')).addTo(wishLayer);
+    wishMarkers.set(w.id, m);
+  });
+  const c = $('#cntWish');
+  if (c) { c.hidden = !state.wish.length; c.textContent = state.wish.length; }
+}
+function wishPopup(id) {
+  const el = document.createElement('div');
+  el.className = 'pop';
+  const w = state.wish.find(x => x.id === id);
+  if (!w) return el;
+  const r = wishInRoute(w);
+  el.innerHTML = `<div class="pop-title">★ ${esc(w.name)}</div>
+    <div class="pop-sub">꼭 가고 싶은 곳 · ${esc(catOf(w.category).short)}${w.note ? ' · ' + esc(w.note) : ''}</div>
+    ${r ? `<div class="pop-sub"><span class="in-route">${icon('route')}${esc(r.day.label)} ${esc(r.stop.time)} 동선에 있음</span></div>` : ''}
+    <div class="acts">${r ? '' : `<button class="btn-sm primary" type="button" data-a="add">${icon('plus')}동선에 추가</button>`}<button class="btn-sm" type="button" data-a="del">${icon('star')}찜 해제</button><a class="btn-sm" href="${esc(stopMapUrl(w))}" target="_blank" rel="noopener">${icon('pin')}${isKorea(w.lat, w.lng) ? '카카오맵' : '구글맵'}</a></div>`;
+  el.addEventListener('click', e => {
+    const b = e.target.closest('[data-a]');
+    if (!b) return;
+    map.closePopup();
+    if (b.dataset.a === 'add') addWishToRoute(id); else toggleWish(w);
+  });
+  return el;
+}
+function wishHtml() {
+  const T = TRIPS[state.trip];
+  let h = `<div class="sec-head"><div class="title">${T.emoji} ${T.label} · 시간 없이 모아 두는 곳<b>★ 꼭 가고 싶은 곳 ${state.wish.length ? state.wish.length + '곳' : ''}</b></div></div>`;
+  if (!state.wish.length) return h + `<div class="empty">${icon('star', 'big')}<h3>아직 찜한 곳이 없어요</h3><p>지도를 탭하거나 검색한 곳, 주변·지역 목록에서 <b>☆ 찜</b>을 누르면 여기에 모여요.<br>시간을 정하지 않아도 돼요.</p></div>`;
+  const rows = state.wish.map(w => ({ w, r: wishInRoute(w) }));
+  const todo = rows.filter(x => !x.r), done = rows.filter(x => x.r);
+  const row = ({ w, r }) => `<div class="place wish-row" data-wid="${w.id}">
+      <span class="wstar${r ? ' done' : ''}">${icon('star')}</span>
+      <div class="place-body">
+        <div class="place-name">${esc(w.name)}</div>
+        <div class="meta">${esc([catOf(w.category).short, (regionAt(w.lat, w.lng) || {}).ko, w.note].filter(Boolean).join(' · '))}</div>
+        ${r ? `<div style="margin-top:4px"><span class="in-route">${icon('route')}${esc(r.day.label)} ${esc(r.stop.time)} 동선에 있음</span></div>` : ''}
+        <div class="acts">
+          ${r ? `<button class="btn-sm" type="button" data-action="wish-day" data-id="${w.id}">${icon('route')}동선에서 보기</button>` : `<button class="btn-sm primary" type="button" data-action="wish-add" data-id="${w.id}">${icon('plus')}동선에 추가</button>`}
+          <button class="btn-sm" type="button" data-action="wish-go" data-id="${w.id}">${icon('pin')}지도</button>
+          <button class="btn-sm" type="button" data-action="wish-del" data-id="${w.id}">${icon('trash')}찜 해제</button>
+        </div>
+      </div>
+    </div>`;
+  h += `<div class="map-key"><span><i class="k-stop">1</i>내 일정</span><span><i class="k-wish"></i>찜 (동선에 넣으면 작고 진하게)</span></div><p class="hint">찜한 곳은 어느 탭에서든 지도에 노란 별로 보여요. 동선에는 원할 때 <b>동선에 추가</b>로 날짜·시간을 정해 넣으세요.</p>`;
+  if (todo.length) h += `<p class="hint area-sum">아직 동선에 없는 곳 ${todo.length}곳</p>` + todo.map(row).join('');
+  if (done.length) h += `<p class="hint area-sum">동선에 넣은 곳 ${done.length}곳</p>` + done.map(row).join('');
+  h += `<p class="foot">찜은 여행지(${T.label})마다 따로 저장되고, 공유 링크에도 함께 담겨요.</p>`;
+  return h;
 }
 
 function renderPois() {
@@ -1930,8 +2065,9 @@ function poiPopup(p, area) {
   const el = document.createElement('div');
   el.className = 'pop';
   el.innerHTML = `<div class="pop-title">${esc(p.name)}</div><div class="pop-sub">${esc(placeMeta(p))}</div>
-    <div class="acts"><button class="btn-sm primary" type="button">${icon('plus')}추가</button><a class="btn-sm" href="${esc(blogUrl(`${p.name} ${area}`))}" target="_blank" rel="noopener">${icon('book')}블로그</a>${p.url ? `<a class="btn-sm" href="${esc(p.url)}" target="_blank" rel="noopener">${icon('pin')}카카오맵</a>` : ''}</div>`;
-  el.querySelector('button').addEventListener('click', () => { map.closePopup(); addFromPlace(p); });
+    <div class="acts"><button class="btn-sm primary" type="button" data-add>${icon('plus')}추가</button>${wishBtn(placeWish(p))}<a class="btn-sm" href="${esc(blogUrl(`${p.name} ${area}`))}" target="_blank" rel="noopener">${icon('book')}블로그</a>${p.url ? `<a class="btn-sm" href="${esc(p.url)}" target="_blank" rel="noopener">${icon('pin')}카카오맵</a>` : ''}</div>`;
+  el.querySelector('[data-add]').addEventListener('click', () => { map.closePopup(); addFromPlace(p); });
+  el.querySelector('[data-wish]').addEventListener('click', () => { map.closePopup(); toggleWish(placeWish(p)); });
   return el;
 }
 function addFromPlace(p) {
@@ -2062,7 +2198,7 @@ function renderPanel() {
   pendingPanel = false;
   renderTripTop();
   el.setAttribute('aria-labelledby', 'tab-' + state.tab);
-  el.innerHTML = state.tab === 'route' ? routeHtml() : state.tab === 'nearby' ? nearbyHtml() : state.tab === 'areas' ? areasHtml() : reviewsHtml();
+  el.innerHTML = state.tab === 'route' ? routeHtml() : state.tab === 'nearby' ? nearbyHtml() : state.tab === 'areas' ? areasHtml() : state.tab === 'wish' ? wishHtml() : reviewsHtml();
 }
 
 const presetButtons = () => Object.entries(PRESETS).filter(([, p]) => p.trip === state.trip).map(([k, p]) => `<button class="btn-sm" type="button" data-action="preset" data-key="${k}">${esc(p.label)}</button>`).join('');
@@ -2159,7 +2295,7 @@ const unb64u = str => Uint8Array.from(atob(str.replace(/-/g, '+').replace(/_/g, 
 async function pipeBytes(bytes, stream) { return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer()); }
 const CAT_KEYS = Object.keys(CATS);
 function sharePayload() {
-  return { v: 1, t: state.trip, d: state.days.filter(d => d.stops.length).map(d => [d.label, d.stops.map(x => [x.time, x.end || '', x.name, CAT_KEYS.indexOf(x.category), x.note || '', Math.round(x.lat * 1e5), Math.round(x.lng * 1e5), x.kid || ''])]) };
+  return { v: 1, t: state.trip, w: state.wish.map(x => [x.name, CAT_KEYS.indexOf(x.category), x.note || '', Math.round(x.lat * 1e5), Math.round(x.lng * 1e5), x.kid || '']), d: state.days.filter(d => d.stops.length).map(d => [d.label, d.stops.map(x => [x.time, x.end || '', x.name, CAT_KEYS.indexOf(x.category), x.note || '', Math.round(x.lat * 1e5), Math.round(x.lng * 1e5), x.kid || ''])]) };
 }
 async function encodePlan(obj) {
   const raw = new TextEncoder().encode(JSON.stringify(obj));
@@ -2174,8 +2310,9 @@ async function decodePlan(code) {
   if (!o || o.v !== 1 || !TRIPS[o.t] || !Array.isArray(o.d)) throw new Error('format');
   const days = o.d.slice(0, 30).map(([label, stops]) => newDay(label, (Array.isArray(stops) ? stops : []).map(r => ({ time: r[0], end: r[1], name: String(r[2] || ''), category: CAT_KEYS[r[3]] || '여행스팟', note: r[4], lat: r[5] / 1e5, lng: r[6] / 1e5, kid: r[7] }))
     .filter(validStop).map(x => normStop({ ...x, id: uid() })))).filter(d => d.stops.length);
-  if (!days.length) throw new Error('empty');
-  return { trip: o.t, days };
+  const wish = normWish((Array.isArray(o.w) ? o.w : []).map(r => ({ name: String(r[0] || ''), category: CAT_KEYS[r[1]] || '여행스팟', note: r[2], lat: r[3] / 1e5, lng: r[4] / 1e5, kid: r[5] })));
+  if (!days.length && !wish.length) throw new Error('empty');
+  return { trip: o.t, days, wish };
 }
 const shareBase = () => (pageOrigin() ? location.origin + location.pathname : 'https://youncall31-glitch.github.io/tripflow/');
 async function shareUrl() { return `${shareBase()}#p=${await encodePlan(sharePayload())}`; }
@@ -2187,6 +2324,7 @@ function planText(url) {
     if (days.length > 1 || d.label !== '1일차') t += `\n[${d.label}]\n`; else t += '\n';
     d.stops.forEach((x, i) => { t += `${i + 1}. ${x.time}${x.end ? '–' + x.end : ''} ${x.name}${x.note ? ` (${x.note})` : ''}\n`; });
   }
+  if (state.wish.length) t += `\n★ 꼭 가고 싶은 곳\n${state.wish.map(w => `- ${w.name}${wishInRoute(w) ? ' (동선에 있음)' : ''}`).join('\n')}\n`;
   return url ? `${t}\n앱에서 지도로 보기: ${url}\n` : t;
 }
 function copyText(text, okMsg) {
@@ -2202,7 +2340,7 @@ function copyText(text, okMsg) {
   else fallback();
 }
 async function sharePlan() {
-  if (!allStops().length) { toast('공유할 일정이 없어요'); return; }
+  if (!allStops().length && !state.wish.length) { toast('공유할 일정이 없어요'); return; }
   const url = await shareUrl(), T = TRIPS[state.trip];
   if (navigator.share && IS_TOUCH) {
     try { await navigator.share({ title: `${T.label} 여행 일정`, text: `${T.emoji} ${T.label} 여행 일정 (${allStops().length}곳) - 링크를 열면 지도와 함께 볼 수 있어요`, url }); return; }
@@ -2211,14 +2349,14 @@ async function sharePlan() {
   copyText(url, '공유 링크를 복사했어요. 카톡·메시지에 붙여 넣어 보내세요');
 }
 async function copyPlanText() {
-  if (!allStops().length) { toast('복사할 일정이 없어요'); return; }
+  if (!allStops().length && !state.wish.length) { toast('복사할 일정이 없어요'); return; }
   copyText(planText(await shareUrl()), '일정을 글로 복사했어요');
 }
 function shareTools() {
   return `<div class="tools"><span class="label">일행과 공유</span>
     <button class="btn-sm primary" type="button" data-action="share">${icon('share')}공유 링크 보내기</button>
     <button class="btn-sm" type="button" data-action="share-text">${icon('copy')}일정 글로 복사</button>
-    <p class="hint">링크를 받은 사람이 열면 <b>${TRIPS[state.trip].emoji} ${TRIPS[state.trip].label}의 모든 날짜 일정</b>이 그 사람 앱에 복사돼요. 로그인·서버 없이 링크 안에 장소 이름·시간·메모만 담겨요. 일정을 고친 뒤엔 <b>새 링크를 다시 보내</b> 주세요(실시간 동기화는 아니에요).</p></div>`;
+    <p class="hint">링크를 받은 사람이 열면 <b>${TRIPS[state.trip].emoji} ${TRIPS[state.trip].label}의 모든 날짜 일정과 찜한 곳</b>이 그 사람 앱에 복사돼요. 로그인·서버 없이 링크 안에 장소 이름·시간·메모만 담겨요. 일정을 고친 뒤엔 <b>새 링크를 다시 보내</b> 주세요(실시간 동기화는 아니에요).</p></div>`;
 }
 let incoming = null;
 async function checkIncoming() {
@@ -2227,10 +2365,10 @@ async function checkIncoming() {
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* 무시 */ }
   try { incoming = await decodePlan(m[1]); }
   catch (e) { toast('공유 링크가 잘렸거나 올바르지 않아요. 다시 받아 주세요'); return false; }
-  const T = TRIPS[incoming.trip], n = incoming.days.reduce((a, d) => a + d.stops.length, 0);
+  const T = TRIPS[incoming.trip], n = incoming.days.reduce((a, d) => a + d.stops.length, 0), nw = incoming.wish.length;
   const cur = state.trips[incoming.trip].days.reduce((a, d) => a + d.stops.length, 0);
-  $('#shSummary').innerHTML = `<b>${T.emoji} ${esc(T.label)} · ${incoming.days.length}일 · ${n}곳</b><br>${incoming.days.map(d => `${esc(d.label)}: ${d.stops.slice(0, 3).map(x => esc(x.name)).join(', ')}${d.stops.length > 3 ? ` 외 ${d.stops.length - 3}곳` : ''}`).join('<br>')}`;
-  $('#shWarn').textContent = cur ? `가져오면 지금 내 ${T.label} 일정(${cur}곳)이 이 일정으로 바뀌어요. 바로 뒤 알림에서 되돌릴 수 있어요.` : `${T.label} 일정으로 저장돼요.`;
+  $('#shSummary').innerHTML = `<b>${T.emoji} ${esc(T.label)} · ${incoming.days.length}일 · ${n}곳${nw ? ` · ★ 찜 ${nw}곳` : ''}</b><br>${incoming.days.map(d => `${esc(d.label)}: ${d.stops.slice(0, 3).map(x => esc(x.name)).join(', ')}${d.stops.length > 3 ? ` 외 ${d.stops.length - 3}곳` : ''}`).join('<br>')}${nw ? `<br>★ ${incoming.wish.slice(0, 3).map(w => esc(w.name)).join(', ')}${nw > 3 ? ` 외 ${nw - 3}곳` : ''}` : ''}`;
+  $('#shWarn').textContent = (cur ? `가져오면 지금 내 ${T.label} 일정(${cur}곳)이 이 일정으로 바뀌어요. 바로 뒤 알림에서 되돌릴 수 있어요.` : `${T.label} 일정으로 저장돼요.`) + (nw ? ' 찜한 곳은 내 찜 목록에 더해져요.' : '');
   const dlg = $('#shareDialog');
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
   return true;
@@ -2241,7 +2379,10 @@ function importIncoming() {
   if (!inc) return;
   incoming = null;
   if (inc.trip !== state.trip) switchTrip(inc.trip);
-  withUndo(`공유받은 ${TRIPS[inc.trip].label} 일정을 가져왔어요`, () => { state.days = inc.days; state.dayId = inc.days[0].id; state.activeId = inc.days[0].stops[0].id; });
+  withUndo(`공유받은 ${TRIPS[inc.trip].label} 일정을 가져왔어요`, () => {
+    if (inc.days.length) { state.days = inc.days; state.dayId = inc.days[0].id; state.activeId = inc.days[0].stops[0].id; }
+    for (const w of inc.wish) if (!findWish(w)) state.wish.push(w);
+  });
   if (state.tab !== 'route') setTab('route');
   fitAll();
 }
@@ -2331,7 +2472,7 @@ function nearbyHtml() {
           <div class="meta">${esc(placeMeta(p))}</div>
           ${p.hours ? `<div class="hours">${icon('clock')}${esc(p.hours)}</div>` : ''}
           <div class="acts">
-            <button class="btn-sm primary" type="button" data-action="add-place" data-idx="${i}">${icon('plus')}추가</button>
+            <button class="btn-sm primary" type="button" data-action="add-place" data-idx="${i}">${icon('plus')}추가</button>${wishBtn(placeWish(p), false, `data-action="wish-place" data-idx="${i}"`)}
             <a class="btn-sm" href="${esc(blogUrl(`${p.name} ${area}`))}" target="_blank" rel="noopener">${icon('book')}블로그</a>
             ${p.url
               ? `<a class="btn-sm" href="${esc(p.url)}" target="_blank" rel="noopener">${icon('pin')}카카오맵</a>`
@@ -2635,12 +2776,12 @@ const C = (n, pos = 'tr') => `<span class="g-call ${pos}">${n}</span>`; // 요�
 const gArrow = (label = '누르면') => `<div class="g-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>${label}</div>`;
 const gMap = (pins = true, route = true) => `<div class="g-map"></div>${route ? `<svg class="g-route" viewBox="0 0 100 162" preserveAspectRatio="none"><polyline points="30,40 58,62 40,84 72,92" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="30,40 58,62 40,84 72,92" fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}${pins ? `<span class="g-pin on" style="left:30%;top:24.7%">1</span><span class="g-pin" style="left:58%;top:38.3%">2</span><span class="g-pin" style="left:40%;top:51.9%">3</span><span class="g-pin" style="left:72%;top:56.8%">4</span>` : ''}`;
 const gTop = (o = {}) => `<div class="g-search">여행지·맛집 검색<i>검색</i>${o.call ? C(o.call, 'tl') : ''}</div><div class="g-help"${o.help ? ' style="box-shadow:0 0 0 .25em #facc15"' : ''}>?${o.helpCall ? C(o.helpCall, 'tl') : ''}${o.helpTap ? T : ''}</div><div class="g-trip"${o.trip ? ' style="box-shadow:0 0 0 .25em #facc15"' : ''}><span class="on">🌴 발리 12</span><span>🍊 제주 0${o.tripCall ? C(o.tripCall) : ''}${o.tripTap ? T : ''}</span></div>`;
-const gHead = (tab = 0, o = {}) => `<div class="g-handle">${o.handle || ''}</div><div class="g-row"><span class="g-stats">12/6 · 6곳 · 62km</span><span class="g-seg"><span class="on">차량</span><span>도보</span></span></div><div class="g-tabs">${['동선', '주변', '지역', '후기'].map((t, i) => `<span${i === tab ? ' class="on"' : ''}>${t}${i === tab && o.tabCall ? C(o.tabCall) : ''}</span>`).join('')}</div>`;
+const gHead = (tab = 0, o = {}) => `<div class="g-handle">${o.handle || ''}</div><div class="g-row"><span class="g-stats">12/6 · 6곳 · 62km</span><span class="g-seg"><span class="on">차량</span><span>도보</span></span></div><div class="g-tabs">${['동선', '주변', '지역', '후기', '찜'].map((t, i) => `<span${i === tab ? ' class="on"' : ''}>${t}${i === tab && o.tabCall ? C(o.tabCall) : ''}</span>`).join('')}</div>`;
 const gFab = (top, path, extra = '') => `<span class="g-fab" style="top:${top}em"><svg viewBox="0 0 24 24">${path}</svg>${extra}</span>`;
 const GUIDE = [
   { t: '여행 동선을 한눈에', lead: '지도에서 하루 동선을 보고, 바로 고치고, 주변 인기 장소까지 찾는 앱이에요. 1분이면 다 볼 수 있어요.',
     stage: () => `<div class="gp">${gMap()}${gTop({ call: 3, tripCall: 4 })}${gCall(1, 68, 33)}<div class="g-sheet" style="--sh:46%">${gHead(0, { tabCall: 2 })}<div class="g-card on"><div class="g-row" style="margin:0"><span class="g-num on">1</span><span class="g-time">07:30</span><b style="display:inline;font-size:1.05em">Villa Baby</b></div></div></div></div>`,
-    steps: ['<b>지도</b>: 번호 핀이 방문 순서, 파란 선이 실제 이동 경로예요.', '<b>아래 패널</b>: 동선·주변·지역·후기 네 가지 탭으로 나뉘어요.', '<b>검색창</b>: 가고 싶은 곳을 검색해서 바로 일정에 넣어요.', '검색창 아래 <b>🌴 발리 / 🍊 제주</b> 버튼으로 여행지를 바꿔요.'] },
+    steps: ['<b>지도</b>: 번호 핀이 방문 순서, 파란 선이 실제 이동 경로예요.', '<b>아래 패널</b>: 동선·주변·지역·후기·찜 다섯 가지 탭으로 나뉘어요.', '<b>검색창</b>: 가고 싶은 곳을 검색해서 바로 일정에 넣어요.', '검색창 아래 <b>🌴 발리 / 🍊 제주</b> 버튼으로 여행지를 바꿔요.'] },
   { t: '여행지·날짜별 동선', lead: '발리와 제주 여행을 따로 짜고, 날짜별로 이동 시간이 계획에 맞는지 바로 확인해요.',
     stage: () => `<div class="gp">${gMap()}${gTop({ trip: true, tripCall: 1, tripTap: true })}<div class="g-sheet" style="--sh:60%">${gHead(0)}<div class="g-row"><span class="g-chip">12/6 (토)</span><span class="g-chip on">12/7 (일)${C(2)}${T}</span><span class="g-chip">+ 날짜</span></div><div class="g-card"><div class="g-row" style="margin:0"><span class="g-num">2</span><span class="g-time">10:10</span><b style="display:inline;font-size:1.05em">바투바락</b></div></div><div class="g-leg">🚗 2.1km · 7분 <span class="g-ok">여유 23분</span></div><div class="g-leg">🚗 18km · 52분 <span class="g-bad">12분 부족${C(3)}</span><span class="g-btn" style="margin-left:auto">길찾기${C(4)}</span></div></div></div>`,
     steps: ['화면 맨 위 검색창 아래 <b>🌴 발리 / 🍊 제주</b> 버튼으로 여행지를 바꿔요. 숫자는 그 여행지의 일정 장소 수이고, 여행지마다 일정·지역이 따로 저장돼요.', '<b>날짜 버튼</b>을 누르면 그날 일정과 지도가 바뀌어요. 선택한 날짜를 한 번 더 누르면 이름을 바꿀 수 있어요.', '장소 사이에 <b>이동 거리·시간</b>이 나와요. 초록 <b>여유</b>면 넉넉하고, 빨간 <b>부족</b>이면 시간을 조정하세요.', '<b>길찾기</b>를 누르면 구글맵(해외)·카카오맵(국내) 길안내가 열려요.'] },
@@ -2650,6 +2791,9 @@ const GUIDE = [
   { t: '검색 결과를 지도에서', lead: '검색하면 결과가 바로 지도에 번호 핀으로 떠요. 숙성도처럼 지점이 여러 곳인 가게도 위치를 한눈에 비교해요.',
     stage: () => `<div class="gp sm">${gMap(false, false)}<div class="g-search" style="color:var(--text)">숙성도<i>검색</i></div><div class="g-chipbar">📍 3곳<span>목록${C(1)}</span></div><span class="g-pin" style="left:40%;top:52%">1</span><span class="g-sr" style="left:26%;top:40%"><b>1</b></span><span class="g-sr" style="left:64%;top:74%"><b>2</b></span>${gCall(2, 78, 70)}<span class="g-sr" style="left:74%;top:44%"><b>3</b>${T}</span></div>${gArrow()}<div class="gp sm">${gMap(false, false)}<span class="g-sr" style="left:74%;top:44%"><b>3</b></span><div class="g-pop" style="left:8%;top:12%"><b>숙성도 노형본관</b><span class="g-btn pri">+ 동선에 추가${C(3)}${T}</span></div></div>`,
     steps: ['검색하면 <b>목록이 접히고 지도에 결과가 번호 핀</b>으로 바로 보여요. 위 검은 막대의 <b>목록</b>을 누르면 이름·거리 목록이 열리고, <b>✕</b>를 누르면 핀이 사라져요.', '<b>검은 번호 핀</b> = 검색 결과예요. 파란 네모(내 일정)·빨간 점(인기 장소)과 구분돼요. 목록의 번호와 같아요.', '번호 핀을 누르면 그 자리로 가서 <b>동선에 추가</b>할 수 있어요. 지금 보는 지역에 결과가 없으면(다른 지역뿐이면) 목록이 그대로 열려 있어요.'] },
+  { t: '꼭 가고 싶은 곳 찜하기', lead: '시간은 아직 몰라도 꼭 가고 싶은 곳은 별(★)로 찜해 두세요. 지도에 늘 보이고, 동선에 넣을지는 나중에 정해요.',
+    stage: () => `<div class="gp sm">${gMap(true, false)}<span class="g-wpin" style="left:78%;top:20%">★</span><span class="g-pin red" style="left:22%;top:72%"></span><div class="g-pop" style="left:8%;top:38%"><b>Single Fin</b><div style="display:flex;gap:.3em"><span class="g-btn pri">+ 동선에 추가</span><span class="g-btn wish" style="position:relative">☆ 찜${C(1)}${T}</span></div></div></div>${gArrow('나중에')}<div class="gp sm">${gMap()}<span class="g-wpin" style="left:78%;top:20%">★${C(2)}</span><span class="g-wpin done" style="left:58%;top:30%">★</span><div class="g-sheet" style="--sh:50%">${gHead(4)}<div class="g-card"><div class="g-row" style="margin:0"><span class="g-wpin" style="position:static;margin:0">★</span><b style="display:inline;font-size:1.05em">Single Fin</b></div><div class="g-btns"><span class="g-btn pri" style="position:relative">+ 동선에 추가${C(3)}</span><span class="g-btn">지도</span><span class="g-btn">찜 해제</span></div></div></div></div>`,
+    steps: ['지도를 탭하거나 검색한 곳, 주변·지역 목록에서 <b>☆ 찜</b>을 누르면 시간 없이 저장돼요.', '찜한 곳은 어느 탭에서든 지도에 <b>노란 별</b>로 보여요. 동선에 넣은 곳은 별이 작고 진해져요.', '<b>찜</b> 탭에서 언제든 <b>동선에 추가</b>를 눌러 날짜·시간을 정해 넣어요. 필요 없어지면 <b>찜 해제</b>.'] },
   { t: '일정 고치기', lead: '시간, 위치, 내용을 바로 고치고, 실수해도 되돌릴 수 있어요.',
     stage: () => `<div class="gp">${gMap()}<span class="g-drag" style="left:36%;top:15%">⤢</span>${gCall(2, 20, 20)}<div class="g-toast" style="top:auto;bottom:52%">뒤 일정 3곳도 30분 밀까요?<em style="position:relative">밀기${C(3, 'tl')}</em></div><div class="g-sheet" style="--sh:48%">${gHead(0)}<div class="g-card on"><div class="g-row" style="margin:0"><span class="g-num on">1</span><span class="g-time" style="box-shadow:0 0 0 .2em #facc15">12:10${C(1)}${T}</span><span class="g-btn" style="margin-left:auto">식당</span></div><b style="margin-top:.3em">Palmilla Beach Club</b><div class="g-btns"><span class="g-btn">주변</span><span class="g-btn">후기</span><span class="g-btn">수정</span><span class="g-btn">구글맵</span></div></div></div></div>`,
     steps: ['<b>시간 칸</b>을 눌러 바꾸면 자동으로 다시 정렬돼요. 늦추면 <b>뒤 일정도 같이 밀기</b>를 한 번에 할 수 있어요.', '선택한 장소의 <b>노란 테두리 핀을 길게 눌러 끌면</b> 위치가 옮겨져요. (숙소처럼 위치가 정확하지 않을 때)', '바꾼 뒤 나오는 알림에서 <b>밀기·되돌리기</b>를 고를 수 있어요. 이름·메모는 <b>수정</b>에서 바꿔요.'] },
@@ -2799,6 +2943,12 @@ function bindUI() {
       else if (action === 'area-clear') { state.areas.sel = []; saveSoon(); renderPanel(); renderAreas(); }
       else if (action === 'area-mine') { state.areas.sel = [...new Set(allStops().map(x => (regionAt(x.lat, x.lng) || {}).id).filter(id => REGIONS.some(r => r.id === id)))]; saveSoon(); renderPanel(); renderAreas(true); }
       else if (action === 'area-retry') { areaErr = false; renderPanel(); }
+      else if (action === 'area-wish') { const x = areaItems()[+a.dataset.rank - 1]; if (x) toggleWish(placeWish(x)); }
+      else if (action === 'wish-place') toggleWish(placeWish(state.nearby.items[+idx]));
+      else if (action === 'wish-add') addWishToRoute(id);
+      else if (action === 'wish-del') toggleWish(state.wish.find(w => w.id === id));
+      else if (action === 'wish-go') focusWish(id);
+      else if (action === 'wish-day') { const r = wishInRoute(state.wish.find(w => w.id === id)); if (r) { setDay(r.day.id); selectStop(r.stop.id); setTab('route'); } }
       else if (action === 'area-add') { const x = areaItems()[+a.dataset.rank - 1]; if (x) addFromPlace({ name: x.name, cat: x.cat, kind: x.kind, lat: x.lat, lng: x.lng }); }
       else if (action === 'nb-base') { if (key === 'me') useMyLocation(); else { state.nearbyBase = 'stop'; loadNearby(); renderPanel(); } }
       else if (action === 'nb-all') { state.nearbyAll = !state.nearbyAll; renderPanel(); renderPois(); }
@@ -2815,6 +2965,8 @@ function bindUI() {
     if (e.target.closest('a, input, select, button')) return;
     const card = e.target.closest('.stop');
     if (card) { selectStop(card.dataset.id); return; }
+    const wr = e.target.closest('.wish-row');
+    if (wr) { focusWish(wr.dataset.wid); return; }
     const ar = e.target.closest('.area-row');
     if (ar) { const x = areaItems()[+ar.dataset.rank - 1]; if (x) focusPlace(x); return; }
     const pl = e.target.closest('.place');
@@ -2900,6 +3052,7 @@ function init() {
   initMap();
   bindUI();
   renderMarkers();
+  renderWish();
   renderHeader();
   renderPanel();
   setSheet('half', false);
