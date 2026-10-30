@@ -91,7 +91,16 @@ a{color:inherit;text-decoration:none;touch-action:manipulation}
 .search-wrap{position:relative;flex:1;min-width:0;max-width:560px;pointer-events:auto}
 .help-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;flex:none;width:54px;height:50px;border-radius:18px;background:var(--surface);color:var(--accent-ink);box-shadow:var(--shadow);font-size:11.5px;font-weight:800;pointer-events:auto}
 .help-btn .ic{width:21px;height:21px}
-.trip-top{flex-basis:100%;display:flex;pointer-events:none}
+.trip-top{flex-basis:100%;display:flex;align-items:center;gap:8px;min-width:0;pointer-events:none}
+.sr-chip{display:flex;align-items:center;gap:2px;min-width:0;height:40px;padding:0 4px 0 12px;border-radius:15px;background:#111827;color:#fff;box-shadow:var(--shadow);font-size:14px;font-weight:750;pointer-events:auto}
+.sr-chip[hidden]{display:none}
+@media (max-width:389px){.trip-top .seg button{padding:0 9px}.trip-top .tcount{display:none}}
+.sr-dot{flex:none;width:10px;height:10px;margin-right:6px;border:2px solid #fff;border-radius:50% 50% 50% 2px;transform:rotate(-45deg)}
+.sr-txt{flex:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sr-chip button{flex:none;height:34px;padding:0 9px;border-radius:11px;color:#fff;font-weight:800}
+.sr-chip #srList{margin-left:6px;background:rgba(255,255,255,.18)}
+.sr-chip .ic{width:18px;height:18px}
+:root[data-theme="dark"] .sr-chip{background:#f8fafc;color:#0b1220}:root[data-theme="dark"] .sr-chip button{color:#0b1220}:root[data-theme="dark"] .sr-chip #srList{background:rgba(0,0,0,.08)}:root[data-theme="dark"] .sr-dot{border-color:#0b1220}
 .trip-top .seg{pointer-events:auto;background:var(--surface);box-shadow:var(--shadow);border-radius:15px}
 .trip-top .seg button{height:34px;padding:0 12px;font-size:14.5px;font-weight:750}
 .trip-top .seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);box-shadow:none}
@@ -122,9 +131,9 @@ a{color:inherit;text-decoration:none;touch-action:manipulation}
 .r-bar{position:sticky;top:-6px;z-index:1;display:flex;align-items:center;gap:8px;margin:-6px -6px 2px;padding:10px 10px 10px 14px;background:var(--surface);border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--text-2)}
 .r-bar span{flex:1}
 .r-no{flex:none;display:grid;place-items:center;width:24px;height:24px;margin-top:-1px;border:2px solid #fff;border-radius:50%;background:#111827;color:#fff;font:800 12px/1 var(--font);box-shadow:0 1px 3px rgba(0,0,0,.3)}
-.sr{display:grid;place-items:center;width:28px;height:28px;border:2.5px solid #fff;border-radius:50% 50% 50% 4px;background:#111827;color:#fff;font:800 13px/1 var(--font);box-shadow:0 2px 8px rgba(0,0,0,.4);transform:rotate(-45deg)}
-.sr b{transform:rotate(45deg)}
-:root[data-theme="dark"] .sr,:root[data-theme="dark"] .r-no{background:#f8fafc;color:#0b1220;border-color:#0b1220}
+.srpin{display:grid;place-items:center;width:28px;height:28px;border:2.5px solid #fff;border-radius:50% 50% 50% 4px;background:#111827;color:#fff;font:800 13px/1 var(--font);box-shadow:0 2px 8px rgba(0,0,0,.4);transform:rotate(-45deg)}
+.srpin b{transform:rotate(45deg)}
+:root[data-theme="dark"] .srpin,:root[data-theme="dark"] .r-no{background:#f8fafc;color:#0b1220;border-color:#0b1220}
 .share-in{margin:0 0 12px;padding:10px 12px;border-radius:14px;background:var(--surface-2);font-size:14px;line-height:1.55;color:var(--text-2)}
 .share-in b{color:var(--text)}
 
@@ -378,6 +387,8 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
 .g-trip>span.on{background:var(--accent);color:#fff}
 .g-sr{position:absolute;display:grid;place-items:center;width:1.9em;height:1.9em;margin:-2.3em 0 0 -.95em;border:.18em solid #fff;border-radius:50% 50% 50% .25em;background:#111827;color:#fff;font-weight:800;font-size:.95em;transform:rotate(-45deg);box-shadow:0 .15em .4em rgba(0,0,0,.35)}
 .g-sr>b{transform:rotate(45deg)}
+.g-chipbar{position:absolute;top:4.3em;left:.9em;display:flex;align-items:center;gap:.5em;padding:.35em .4em .35em .8em;border-radius:1em;background:#111827;color:#fff;font-size:.95em;font-weight:800;box-shadow:0 .2em .6em rgba(0,0,0,.25)}
+.g-chipbar>span{position:relative;padding:.25em .6em;border-radius:.7em;background:rgba(255,255,255,.2)}
 .g-list{position:absolute;left:.9em;right:.9em;top:4.3em;padding:.3em;border-radius:1.1em;background:var(--surface);box-shadow:0 .2em .8em rgba(0,0,0,.22)}
 .g-li{display:flex;align-items:center;gap:.5em;padding:.45em .4em;font-size:.95em}
 .g-li i{display:grid;place-items:center;flex:none;width:1.5em;height:1.5em;border-radius:50%;background:#111827;color:#fff;font-style:normal;font-weight:800;font-size:.85em}
@@ -547,7 +558,7 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
         <ul class="results" id="results" hidden></ul>
       </div>
       <button class="help-btn" id="btnGuide" type="button" aria-label="사용법 보기" title="사용법 보기"><svg class="ic"><use href="#i-help"/></svg>사용법</button>
-      <div class="trip-top" id="tripTop"></div>
+      <div class="trip-top"><div id="tripTop"></div><div class="sr-chip" id="srChip" hidden><span class="sr-dot"></span><span class="sr-txt" id="srTxt"></span><button type="button" id="srList">목록</button><button type="button" id="srClear" aria-label="검색 결과 지우기"><svg class="ic"><use href="#i-x"/></svg></button></div></div>
     </div>
 
     <div class="fabs">
@@ -1400,7 +1411,7 @@ function mergeResults(s) {
   };
 }
 
-let searchCtrl = null, searchSeq = 0, lastResults = [], lastSearch = null, searchLayer = null, mappedIdx = [];
+let lastLocal = 0, searchCtrl = null, searchSeq = 0, lastResults = [], lastSearch = null, searchLayer = null, mappedIdx = [];
 async function runSearch(raw) {
   const q = raw.trim();
   if (!q) { toast('검색할 장소 이름을 입력해 주세요'); return; }
@@ -1419,6 +1430,9 @@ async function runSearch(raw) {
     if (!kOk && !osm && !open) { toast('검색 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요'); return; }
     lastSearch = { q, center, kk: kOk, osm: osm || [], open: open || [], page: 1, more: !!(kOk && kOk.more), kakaoFailed: !!(kk && kk.error) };
     renderResults(false);
+    // 검색하면 바로 지도에 번호 핀으로: 휴대폰은 목록을 접고 지도를 결과에 맞춤 (목록은 위 '목록' 버튼으로)
+    // 지금 보는 지역 결과가 없으면(다른 지역뿐) 데이터 누락일 수 있어 목록·안내를 그대로 보여줌
+    if (lastLocal && mappedIdx.length) { if (isSide()) fitResults(); else showResultsOnMap(); }
   } finally {
     if (searchCtrl === ctrl) { setSearchBusy(false); searchCtrl = null; }
   }
@@ -1447,7 +1461,7 @@ function renderResults(keepScroll) {
   if (!s) { ul.hidden = true; return; }
   const { exact, near, far } = mergeResults(s);
   lastResults = exact.concat(near, far);
-  const local = exact.length + near.length, nMap = Math.min(local || far.length, SEARCH_MAP_MAX);
+  const local = lastLocal = exact.length + near.length, nMap = Math.min(local || far.length, SEARCH_MAP_MAX);
   const row = (r, i) => `<li><button class="r-row" type="button" data-i="${i}">${i < nMap ? `<span class="r-no">${i + 1}</span>` : icon(catOf(r.category).icon)}<span class="r-text"><span class="r-name">${esc(r.name)}</span><span class="r-sub">${esc([r.sub, r.kind].filter(Boolean).join(' · '))}</span></span><span class="r-dist">${fmtKm(r.dist)}</span></button></li>`;
   let h = '';
   if (exact.length) h += `<li class="r-head">이름이 같은 곳</li>${exact.map(row).join('')}`;
@@ -1461,6 +1475,7 @@ function renderResults(keepScroll) {
   const top = ul.scrollTop;
   ul.innerHTML = h;
   ul.hidden = false;
+  syncChip();
   ul.scrollTop = keepScroll ? top : 0;
 }
 function resultsFoot(s) {
@@ -1471,7 +1486,9 @@ function resultsFoot(s) {
   const g = `https://www.google.com/maps/search/${encodeURIComponent(s.q)}/@${s.center.lat.toFixed(5)},${s.center.lng.toFixed(5)},14z`;
   return `<li class="r-foot"><span>장소 검색: ${s.open && s.open.length ? 'Overture Maps 오픈 데이터 · ' : ''}OpenStreetMap. 없으면 구글맵에서 찾은 뒤 앱 지도에서 그 위치를 탭해 추가하세요.</span><a class="btn-sm" href="${esc(g)}" target="_blank" rel="noopener">${icon('search')}구글맵에서 찾기</a></li>`;
 }
-const hideResults = () => { $('#results').hidden = true; };
+const syncChip = () => { const c = $('#srChip'); if (!c) return; const on = mappedIdx.length > 0 && $('#results').hidden; c.hidden = !on; if (on) $("#srTxt").textContent = `${mappedIdx.length}곳`; };
+const hideResults = () => { $('#results').hidden = true; syncChip(); };
+const openResults = () => { if (!lastSearch) return; $('#results').hidden = false; syncChip(); };
 /* 검색 결과를 지도에 번호 핀으로: 이름이 같은 곳·근처 결과(없으면 전체 결과 앞쪽) 최대 30곳 */
 const SEARCH_MAP_MAX = 30;
 function renderSearchMarkers(local) {
@@ -1485,21 +1502,26 @@ function renderSearchMarkers(local) {
     if (!r || !Number.isFinite(r.lat) || !Number.isFinite(r.lng)) continue;
     mappedIdx.push(i);
     L.marker([r.lat, r.lng], {
-      icon: L.divIcon({ className: '', html: `<div class="sr"><b>${i + 1}</b></div>`, iconSize: [28, 28], iconAnchor: [14, 34] }),
+      icon: L.divIcon({ className: '', html: `<div class="srpin"><b>${i + 1}</b></div>`, iconSize: [28, 28], iconAnchor: [14, 34] }),
       title: `${i + 1}. ${r.name}`, keyboard: true, zIndexOffset: -1000 - i, // 내 일정 핀 아래, 인기 장소 점 위
     }).on('click', () => pickResult(r)).addTo(searchLayer);
   }
 }
-function clearSearchMarkers() { if (searchLayer) searchLayer.clearLayers(); mappedIdx = []; }
+function clearSearchMarkers() { if (searchLayer) searchLayer.clearLayers(); mappedIdx = []; syncChip(); }
+function fitResults() {
+  const pts = mappedIdx.map(i => [lastResults[i].lat, lastResults[i].lng]);
+  if (!pts.length) return;
+  if (pts.length === 1) focusPoint(pts[0], 16);
+  else map.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [36, topInset() + 40], paddingBottomRight: [isSide() ? 36 : 64, bottomInset() + 24], maxZoom: 16, animate: !REDUCED });
+}
 function showResultsOnMap() {
   const pts = mappedIdx.map(i => [lastResults[i].lat, lastResults[i].lng]);
   hideResults();
   $('#q').blur();
   if (!pts.length) return;
   if (!isSide() && state.sheet === 'full') setSheet('half');
-  if (pts.length === 1) focusPoint(pts[0], 16);
-  else map.fitBounds(L.latLngBounds(pts), { paddingTopLeft: [36, topInset() + 40], paddingBottomRight: [isSide() ? 36 : 64, bottomInset() + 24], maxZoom: 16, animate: !REDUCED });
-  toast(`검색 결과 ${pts.length}곳 · 번호 핀을 누르면 일정에 넣을 수 있어요`, { action: '목록', onAction: () => { $('#results').hidden = false; } });
+  fitResults();
+  toast(`번호 핀을 누르면 일정에 넣을 수 있어요`);
 }
 function pickResult(r) {
   if (!r) return;
@@ -2625,9 +2647,9 @@ const GUIDE = [
   { t: '장소 추가하기', lead: '지도를 탭하거나 검색해서 찾은 곳을 시간과 함께 넣어요.',
     stage: () => `<div class="gp sm">${gMap(true, false)}${gTop()}<span class="g-pin red" style="left:62%;top:44%"></span>${gCall(1, 80, 38)}<div class="g-pop" style="left:22%;top:15%"><b>Menega Cafe</b><span class="g-btn pri">+ 동선에 추가${T}</span></div></div>${gArrow()}<div class="gp sm">${gMap(false, false)}<div class="g-scrim"></div><div class="g-dlg" style="top:14%"><b style="display:block;font-size:1.2em;margin-bottom:.6em">동선에 추가</b><div class="g-field"><span>장소 이름</span><div>Menega Cafe</div></div><div class="g-row"><div class="g-field" style="flex:1;margin:0"><span>시작</span><div>17:20</div></div><div class="g-field" style="flex:1;margin:0"><span>끝(선택)</span><div>19:40</div></div></div><span class="g-btn pri" style="display:block;text-align:center;margin-top:.4em">추가${C(2)}</span></div></div>`,
     steps: ['<b>지도를 탭</b>하면 빨간 핀이 꽂히고 장소 이름을 알려줘요. 위 <b>검색창</b>으로 찾아도 돼요.', '<b>동선에 추가</b>를 누르고 시작·끝 시간을 넣으면 시간순으로 자리 잡아요.', '이미 있는 일정과 시간이 겹치면 <b>뒤 일정을 미룰지</b> 물어봐요.'] },
-  { t: '검색 결과를 지도에서', lead: '숙성도처럼 지점이 여러 곳인 가게도 어디에 있는지 지도에서 한눈에 비교해요.',
-    stage: () => `<div class="gp sm">${gMap(false, false)}<div class="g-search" style="color:var(--text)">숙성도<i>검색</i></div><div class="g-list"><div class="g-li" style="font-weight:800;color:var(--text-2);border-bottom:1px solid var(--line)">지도에 3곳<span class="g-btn pri" style="margin-left:auto;position:relative">지도에서 보기${C(1)}${T}</span></div><div class="g-li"><i>1</i>숙성도 애월점<small>3km</small></div><div class="g-li"><i>2</i>숙성도 중문점<small>21km</small></div><div class="g-li"><i>3</i>숙성도 노형본관<small>9km</small></div></div></div>${gArrow()}<div class="gp sm">${gMap(false, false)}<span class="g-pin" style="left:40%;top:52%">1</span><span class="g-sr" style="left:26%;top:40%"><b>1</b></span><span class="g-sr" style="left:64%;top:74%"><b>2</b></span>${gCall(2, 78, 70)}<span class="g-sr" style="left:74%;top:44%"><b>3</b></span><div class="g-pop" style="left:6%;top:4%"><b>숙성도 애월점</b><span class="g-btn pri">+ 동선에 추가${C(3)}${T}</span></div></div>`,
-    steps: ['검색하면 결과마다 <b>번호</b>가 붙어요. <b>지도에서 보기</b>를 누르면 목록이 닫히고 지도에 번호 핀이 보여요. (목록 밖 지도를 탭해도 돼요)', '<b>검은 번호 핀</b> = 검색 결과예요. 파란 네모(내 일정)·빨간 점(인기 장소)과 구분돼요. 검색창을 다시 누르면 목록이 다시 열려요.', '번호 핀을 누르면 그 자리로 가서 <b>동선에 추가</b>할 수 있어요. 검색어를 지우면 핀도 사라져요.'] },
+  { t: '검색 결과를 지도에서', lead: '검색하면 결과가 바로 지도에 번호 핀으로 떠요. 숙성도처럼 지점이 여러 곳인 가게도 위치를 한눈에 비교해요.',
+    stage: () => `<div class="gp sm">${gMap(false, false)}<div class="g-search" style="color:var(--text)">숙성도<i>검색</i></div><div class="g-chipbar">📍 3곳<span>목록${C(1)}</span></div><span class="g-pin" style="left:40%;top:52%">1</span><span class="g-sr" style="left:26%;top:40%"><b>1</b></span><span class="g-sr" style="left:64%;top:74%"><b>2</b></span>${gCall(2, 78, 70)}<span class="g-sr" style="left:74%;top:44%"><b>3</b>${T}</span></div>${gArrow()}<div class="gp sm">${gMap(false, false)}<span class="g-sr" style="left:74%;top:44%"><b>3</b></span><div class="g-pop" style="left:8%;top:12%"><b>숙성도 노형본관</b><span class="g-btn pri">+ 동선에 추가${C(3)}${T}</span></div></div>`,
+    steps: ['검색하면 <b>목록이 접히고 지도에 결과가 번호 핀</b>으로 바로 보여요. 위 검은 막대의 <b>목록</b>을 누르면 이름·거리 목록이 열리고, <b>✕</b>를 누르면 핀이 사라져요.', '<b>검은 번호 핀</b> = 검색 결과예요. 파란 네모(내 일정)·빨간 점(인기 장소)과 구분돼요. 목록의 번호와 같아요.', '번호 핀을 누르면 그 자리로 가서 <b>동선에 추가</b>할 수 있어요. 지금 보는 지역에 결과가 없으면(다른 지역뿐이면) 목록이 그대로 열려 있어요.'] },
   { t: '일정 고치기', lead: '시간, 위치, 내용을 바로 고치고, 실수해도 되돌릴 수 있어요.',
     stage: () => `<div class="gp">${gMap()}<span class="g-drag" style="left:36%;top:15%">⤢</span>${gCall(2, 20, 20)}<div class="g-toast" style="top:auto;bottom:52%">뒤 일정 3곳도 30분 밀까요?<em style="position:relative">밀기${C(3, 'tl')}</em></div><div class="g-sheet" style="--sh:48%">${gHead(0)}<div class="g-card on"><div class="g-row" style="margin:0"><span class="g-num on">1</span><span class="g-time" style="box-shadow:0 0 0 .2em #facc15">12:10${C(1)}${T}</span><span class="g-btn" style="margin-left:auto">식당</span></div><b style="margin-top:.3em">Palmilla Beach Club</b><div class="g-btns"><span class="g-btn">주변</span><span class="g-btn">후기</span><span class="g-btn">수정</span><span class="g-btn">구글맵</span></div></div></div></div>`,
     steps: ['<b>시간 칸</b>을 눌러 바꾸면 자동으로 다시 정렬돼요. 늦추면 <b>뒤 일정도 같이 밀기</b>를 한 번에 할 수 있어요.', '선택한 장소의 <b>노란 테두리 핀을 길게 눌러 끌면</b> 위치가 옮겨져요. (숙소처럼 위치가 정확하지 않을 때)', '바꾼 뒤 나오는 알림에서 <b>밀기·되돌리기</b>를 고를 수 있어요. 이름·메모는 <b>수정</b>에서 바꿔요.'] },
@@ -2709,7 +2731,9 @@ function bindUI() {
   // 검색
   $('#searchForm').addEventListener('submit', e => { e.preventDefault(); runSearch($('#q').value); });
   $('#q').addEventListener('input', () => { const has = !!$('#q').value; $('#clearQ').hidden = !has; if (!has) { hideResults(); clearSearchMarkers(); } });
-  $('#q').addEventListener('focus', () => { if (lastSearch && mappedIdx.length && $('#q').value.trim() === lastSearch.q) $('#results').hidden = false; });
+  $('#q').addEventListener('focus', () => { if (lastSearch && mappedIdx.length && $('#q').value.trim() === lastSearch.q) openResults(); });
+  $('#srList').addEventListener('click', e => { e.stopPropagation(); openResults(); });
+  $('#srClear').addEventListener('click', () => { $('#q').value = ''; $('#clearQ').hidden = true; hideResults(); clearSearchMarkers(); });
   $('#clearQ').addEventListener('click', () => { $('#q').value = ''; $('#clearQ').hidden = true; hideResults(); clearSearchMarkers(); $('#q').focus(); });
   $('#results').addEventListener('click', e => {
     const b = e.target.closest('[data-i], [data-more], [data-kakao], [data-mapview]');
