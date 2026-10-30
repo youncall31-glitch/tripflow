@@ -87,10 +87,16 @@ a{color:inherit;text-decoration:none;touch-action:manipulation}
 #map{position:absolute;inset:0;z-index:0;background:var(--surface-3)}
 
 /* 상단 검색 */
-.topbar{position:absolute;z-index:40;top:0;left:0;right:0;display:flex;align-items:flex-start;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));pointer-events:none}
+.topbar{position:absolute;z-index:40;top:0;left:0;right:0;display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));pointer-events:none}
 .search-wrap{position:relative;flex:1;min-width:0;max-width:560px;pointer-events:auto}
 .help-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;flex:none;width:54px;height:50px;border-radius:18px;background:var(--surface);color:var(--accent-ink);box-shadow:var(--shadow);font-size:11.5px;font-weight:800;pointer-events:auto}
 .help-btn .ic{width:21px;height:21px}
+.trip-top{flex-basis:100%;display:flex;pointer-events:none}
+.trip-top .seg{pointer-events:auto;background:var(--surface);box-shadow:var(--shadow);border-radius:15px}
+.trip-top .seg button{height:34px;padding:0 12px;font-size:14.5px;font-weight:750}
+.trip-top .seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);box-shadow:none}
+.trip-top .tcount{margin-left:2px;padding:0 6px;border-radius:8px;background:var(--surface-2);font-size:12px;font-weight:800;color:var(--text-3)}
+.trip-top button[aria-pressed="true"] .tcount{background:rgba(255,255,255,.25);color:inherit}
 .search{display:flex;align-items:center;gap:2px;height:50px;padding:0 5px 0 12px;background:var(--surface);border-radius:25px;box-shadow:var(--shadow)}
 .brand{display:grid;place-items:center;width:28px;flex:none;color:var(--accent)}
 .brand .ic{width:22px;height:22px}
@@ -115,11 +121,11 @@ a{color:inherit;text-decoration:none;touch-action:manipulation}
 .r-foot.warn{color:var(--warn)}
 
 /* 지도 위 버튼 */
-.fabs{position:absolute;z-index:15;right:max(12px,env(safe-area-inset-right));top:calc(env(safe-area-inset-top) + 72px);display:flex;flex-direction:column;gap:10px}
+.fabs{position:absolute;z-index:15;right:max(12px,env(safe-area-inset-right));top:calc(env(safe-area-inset-top) + 112px);display:flex;flex-direction:column;gap:10px}
 .fab{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
 .fab .ic{width:22px;height:22px}
 .fab[aria-expanded="true"]{background:var(--accent);color:var(--on-accent)}
-.menu{position:absolute;z-index:45;right:calc(max(12px,env(safe-area-inset-right)) + 56px);top:calc(env(safe-area-inset-top) + 72px);width:min(264px,calc(100vw - 96px));padding:8px 10px 12px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow)}
+.menu{position:absolute;z-index:45;right:calc(max(12px,env(safe-area-inset-right)) + 56px);top:calc(env(safe-area-inset-top) + 112px);width:min(264px,calc(100vw - 96px));padding:8px 10px 12px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow)}
 .menu h3{margin:8px 6px 4px;font-size:12.5px;font-weight:700;color:var(--text-3)}
 .opt{display:flex;align-items:center;gap:12px;width:100%;min-height:46px;padding:0 8px;border-radius:12px;font-size:15.5px;text-align:left}
 .opt::before{content:"";flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--grip)}
@@ -359,6 +365,9 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
 .g-search{position:absolute;top:1em;left:.9em;right:3.6em;height:2.8em;display:flex;align-items:center;gap:.5em;padding:0 .4em 0 1em;border-radius:1.4em;background:var(--surface);box-shadow:0 .2em .6em rgba(0,0,0,.18);font-size:1em;color:var(--text-3)}
 .g-search i{margin-left:auto;padding:.45em .8em;border-radius:1em;background:var(--accent);color:#fff;font-style:normal;font-weight:800}
 .g-help{position:absolute;top:1em;right:.9em;width:2.4em;height:2.8em;display:grid;place-items:center;border-radius:.9em;background:var(--surface);box-shadow:0 .2em .6em rgba(0,0,0,.18);color:var(--accent-ink);font-weight:900;font-size:1.1em}
+.g-trip{position:absolute;top:4.3em;left:.9em;display:flex;padding:.2em;border-radius:1em;background:var(--surface);box-shadow:0 .2em .6em rgba(0,0,0,.18);font-size:.95em;font-weight:800}
+.g-trip>span{position:relative;padding:.35em .7em;border-radius:.8em;color:var(--text-3)}
+.g-trip>span.on{background:var(--accent);color:#fff}
 .g-fab{position:absolute;right:.9em;width:2.6em;height:2.6em;border-radius:50%;background:var(--surface);box-shadow:0 .2em .6em rgba(0,0,0,.18)}
 .g-fab svg{width:1.4em;height:1.4em;margin:.6em;fill:none;stroke:var(--text);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .g-pin{position:absolute;display:grid;place-items:center;width:2.2em;height:2.2em;margin:-1.1em 0 0 -1.1em;border:.22em solid #fff;border-radius:.7em;background:#1d4ed8;color:#fff;font-size:1em;font-weight:800;box-shadow:0 .2em .5em rgba(0,0,0,.3)}
@@ -429,7 +438,7 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
 @media (prefers-reduced-motion:reduce){.g-tap::before,.g-tap svg{animation:none}}
 
 /* ===================== 토스트 ===================== */
-.toast{position:fixed;z-index:60;left:50%;top:calc(env(safe-area-inset-top) + 70px);display:flex;align-items:center;gap:10px;width:max-content;max-width:calc(100% - 24px);padding:11px 12px 11px 16px;border-radius:16px;background:var(--toast-bg);color:var(--toast-ink);box-shadow:var(--shadow);font-size:14.5px;font-weight:600;line-height:1.35;opacity:0;pointer-events:none;transform:translate(-50%,-8px);transition:opacity .2s,transform .2s}
+.toast{position:fixed;z-index:60;left:50%;top:calc(env(safe-area-inset-top) + 112px);display:flex;align-items:center;gap:10px;width:max-content;max-width:calc(100% - 24px);padding:11px 12px 11px 16px;border-radius:16px;background:var(--toast-bg);color:var(--toast-ink);box-shadow:var(--shadow);font-size:14.5px;font-weight:600;line-height:1.35;opacity:0;pointer-events:none;transform:translate(-50%,-8px);transition:opacity .2s,transform .2s}
 .toast.show{opacity:1;transform:translate(-50%,0)} /* 알림 본문은 아래 패널·지도 조작을 막지 않음 */
 .toast.show button{pointer-events:auto}
 .toast button{flex:none;height:34px;padding:0 6px;color:var(--toast-act);font-size:14.5px;font-weight:800}
@@ -521,6 +530,7 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
         <ul class="results" id="results" hidden></ul>
       </div>
       <button class="help-btn" id="btnGuide" type="button" aria-label="사용법 보기" title="사용법 보기"><svg class="ic"><use href="#i-help"/></svg>사용법</button>
+      <div class="trip-top" id="tripTop"></div>
     </div>
 
     <div class="fabs">
@@ -953,7 +963,7 @@ const PAD_TL = [16, 80], PAD_BR = [16, 300];   // 팝업 자동 이동 여백 (�
 let lastPopupClose = 0, suppressMapClickUntil = 0;
 
 const isSide = () => SIDE_MQ.matches;
-const topInset = () => $('.search').getBoundingClientRect().bottom - $('#map').getBoundingClientRect().top;
+const topInset = () => $('.topbar').getBoundingClientRect().bottom - $('#map').getBoundingClientRect().top;
 const bottomInset = () => (isSide() ? 0 : sheetPx);
 
 function initMap() {
@@ -1963,13 +1973,17 @@ function renderPanel() {
   const ae = document.activeElement;
   if (ae && el.contains(ae) && ae.matches('input, select')) { pendingPanel = true; return; } // 시간 선택 중엔 다시 그리지 않음
   pendingPanel = false;
+  renderTripTop();
   el.setAttribute('aria-labelledby', 'tab-' + state.tab);
   el.innerHTML = state.tab === 'route' ? routeHtml() : state.tab === 'nearby' ? nearbyHtml() : state.tab === 'areas' ? areasHtml() : reviewsHtml();
 }
 
 const presetButtons = () => Object.entries(PRESETS).filter(([, p]) => p.trip === state.trip).map(([k, p]) => `<button class="btn-sm" type="button" data-action="preset" data-key="${k}">${esc(p.label)}</button>`).join('');
+function renderTripTop() {
+  const el = $('#tripTop'); if (el) el.innerHTML = tripBar();
+}
 function tripBar() {
-  return `<div class="seg full trip-seg" role="group" aria-label="여행지">${Object.entries(TRIPS).map(([k, t]) =>
+  return `<div class="seg" role="group" aria-label="여행지 바꾸기">${Object.entries(TRIPS).map(([k, t]) =>
     `<button type="button" data-action="trip" data-key="${k}" aria-pressed="${state.trip === k}">${t.emoji} ${t.label}<span class="tcount">${state.trips[k].days.reduce((a, d) => a + d.stops.length, 0)}</span></button>`).join('')}</div>`;
 }
 function dayBar() {
@@ -1986,11 +2000,11 @@ function dayTools() {
 function routeHtml() {
   const S = state.stops;
   if (!S.length) {
-    return tripBar() + dayBar() + `<div class="empty">${icon('pin', 'big')}<h3>${multiDay() ? esc(curDay().label) + ' 일정이 없어요' : '아직 일정이 없어요'}</h3><p>지도를 탭하거나 위에서 장소를 검색해<br>방문 시간과 함께 추가해 보세요.</p><div class="acts">${presetButtons()}${multiDay() ? dayTools() : ''}</div></div>`;
+    return dayBar() + `<div class="empty">${icon('pin', 'big')}<h3>${multiDay() ? esc(curDay().label) + ' 일정이 없어요' : '아직 일정이 없어요'}</h3><p>지도를 탭하거나 위에서 장소를 검색해<br>방문 시간과 함께 추가해 보세요.</p><div class="acts">${presetButtons()}${multiDay() ? dayTools() : ''}</div></div>`;
   }
   const legsOk = state.route.key === routeKey() && state.route.legs.length === S.length - 1;
   const walk = state.mode === 'walking';
-  let h = tripBar() + dayBar();
+  let h = dayBar();
   h += legsOk && state.route.status === 'estimate'
     ? `<div class="notice">${icon('alert')}<span>경로 서버가 응답하지 않아 직선거리로 어림잡았어요.</span><button class="btn-sm" type="button" data-action="retry-route">${icon('refresh')}다시 계산</button></div>`
     : '';
@@ -2435,16 +2449,16 @@ const T = `<span class="g-tap in">${HAND}</span>`;                     // 요소
 const C = (n, pos = 'tr') => `<span class="g-call ${pos}">${n}</span>`; // 요소 모서리에 붙는 번호
 const gArrow = (label = '누르면') => `<div class="g-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>${label}</div>`;
 const gMap = (pins = true, route = true) => `<div class="g-map"></div>${route ? `<svg class="g-route" viewBox="0 0 100 162" preserveAspectRatio="none"><polyline points="30,40 58,62 40,84 72,92" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="30,40 58,62 40,84 72,92" fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}${pins ? `<span class="g-pin on" style="left:30%;top:24.7%">1</span><span class="g-pin" style="left:58%;top:38.3%">2</span><span class="g-pin" style="left:40%;top:51.9%">3</span><span class="g-pin" style="left:72%;top:56.8%">4</span>` : ''}`;
-const gTop = (o = {}) => `<div class="g-search">여행지·맛집 검색<i>검색</i>${o.call ? C(o.call, 'tl') : ''}</div><div class="g-help"${o.help ? ' style="box-shadow:0 0 0 .25em #facc15"' : ''}>?${o.helpCall ? C(o.helpCall, 'tl') : ''}${o.helpTap ? T : ''}</div>`;
+const gTop = (o = {}) => `<div class="g-search">여행지·맛집 검색<i>검색</i>${o.call ? C(o.call, 'tl') : ''}</div><div class="g-help"${o.help ? ' style="box-shadow:0 0 0 .25em #facc15"' : ''}>?${o.helpCall ? C(o.helpCall, 'tl') : ''}${o.helpTap ? T : ''}</div><div class="g-trip"${o.trip ? ' style="box-shadow:0 0 0 .25em #facc15"' : ''}><span class="on">🌴 발리 12</span><span>🍊 제주 0${o.tripCall ? C(o.tripCall) : ''}${o.tripTap ? T : ''}</span></div>`;
 const gHead = (tab = 0, o = {}) => `<div class="g-handle">${o.handle || ''}</div><div class="g-row"><span class="g-stats">12/6 · 6곳 · 62km</span><span class="g-seg"><span class="on">차량</span><span>도보</span></span></div><div class="g-tabs">${['동선', '주변', '지역', '후기'].map((t, i) => `<span${i === tab ? ' class="on"' : ''}>${t}${i === tab && o.tabCall ? C(o.tabCall) : ''}</span>`).join('')}</div>`;
 const gFab = (top, path, extra = '') => `<span class="g-fab" style="top:${top}em"><svg viewBox="0 0 24 24">${path}</svg>${extra}</span>`;
 const GUIDE = [
   { t: '여행 동선을 한눈에', lead: '지도에서 하루 동선을 보고, 바로 고치고, 주변 인기 장소까지 찾는 앱이에요. 1분이면 다 볼 수 있어요.',
-    stage: () => `<div class="gp">${gMap()}${gTop({ call: 3 })}${gCall(1, 68, 33)}<div class="g-sheet" style="--sh:46%">${gHead(0, { tabCall: 2 })}<div class="g-card on"><div class="g-row" style="margin:0"><span class="g-num on">1</span><span class="g-time">07:30</span><b style="display:inline;font-size:1.05em">Villa Baby</b></div></div></div></div>`,
-    steps: ['<b>지도</b>: 번호 핀이 방문 순서, 파란 선이 실제 이동 경로예요.', '<b>아래 패널</b>: 동선·주변·지역·후기 네 가지 탭으로 나뉘어요.', '<b>검색창</b>: 가고 싶은 곳을 검색해서 바로 일정에 넣어요.'] },
+    stage: () => `<div class="gp">${gMap()}${gTop({ call: 3, tripCall: 4 })}${gCall(1, 68, 33)}<div class="g-sheet" style="--sh:46%">${gHead(0, { tabCall: 2 })}<div class="g-card on"><div class="g-row" style="margin:0"><span class="g-num on">1</span><span class="g-time">07:30</span><b style="display:inline;font-size:1.05em">Villa Baby</b></div></div></div></div>`,
+    steps: ['<b>지도</b>: 번호 핀이 방문 순서, 파란 선이 실제 이동 경로예요.', '<b>아래 패널</b>: 동선·주변·지역·후기 네 가지 탭으로 나뉘어요.', '<b>검색창</b>: 가고 싶은 곳을 검색해서 바로 일정에 넣어요.', '검색창 아래 <b>🌴 발리 / 🍊 제주</b> 버튼으로 여행지를 바꿔요.'] },
   { t: '여행지·날짜별 동선', lead: '발리와 제주 여행을 따로 짜고, 날짜별로 이동 시간이 계획에 맞는지 바로 확인해요.',
-    stage: () => `<div class="gp">${gMap()}<div class="g-sheet" style="--sh:72%">${gHead(0)}<div class="g-row"><span class="g-seg" style="margin:0;flex:1;justify-content:space-around"><span class="on">🌴 발리 12</span><span>🍊 제주${C(1)}</span></span></div><div class="g-row"><span class="g-chip">12/6 (토)</span><span class="g-chip on">12/7 (일)${C(2)}${T}</span><span class="g-chip">+ 날짜</span></div><div class="g-card"><div class="g-row" style="margin:0"><span class="g-num">2</span><span class="g-time">10:10</span><b style="display:inline;font-size:1.05em">바투바락</b></div></div><div class="g-leg">🚗 2.1km · 7분 <span class="g-ok">여유 23분</span></div><div class="g-leg">🚗 18km · 52분 <span class="g-bad">12분 부족${C(3)}</span><span class="g-btn" style="margin-left:auto">길찾기${C(4)}</span></div></div></div>`,
-    steps: ['맨 위 <b>🌴 발리 / 🍊 제주</b>로 여행지를 바꿔요. 여행지마다 일정·지역이 따로 저장돼요.', '<b>날짜 버튼</b>을 누르면 그날 일정과 지도가 바뀌어요. 선택한 날짜를 한 번 더 누르면 이름을 바꿀 수 있어요.', '장소 사이에 <b>이동 거리·시간</b>이 나와요. 초록 <b>여유</b>면 넉넉하고, 빨간 <b>부족</b>이면 시간을 조정하세요.', '<b>길찾기</b>를 누르면 구글맵(해외)·카카오맵(국내) 길안내가 열려요.'] },
+    stage: () => `<div class="gp">${gMap()}${gTop({ trip: true, tripCall: 1, tripTap: true })}<div class="g-sheet" style="--sh:60%">${gHead(0)}<div class="g-row"><span class="g-chip">12/6 (토)</span><span class="g-chip on">12/7 (일)${C(2)}${T}</span><span class="g-chip">+ 날짜</span></div><div class="g-card"><div class="g-row" style="margin:0"><span class="g-num">2</span><span class="g-time">10:10</span><b style="display:inline;font-size:1.05em">바투바락</b></div></div><div class="g-leg">🚗 2.1km · 7분 <span class="g-ok">여유 23분</span></div><div class="g-leg">🚗 18km · 52분 <span class="g-bad">12분 부족${C(3)}</span><span class="g-btn" style="margin-left:auto">길찾기${C(4)}</span></div></div></div>`,
+    steps: ['화면 맨 위 검색창 아래 <b>🌴 발리 / 🍊 제주</b> 버튼으로 여행지를 바꿔요. 숫자는 그 여행지의 일정 장소 수이고, 여행지마다 일정·지역이 따로 저장돼요.', '<b>날짜 버튼</b>을 누르면 그날 일정과 지도가 바뀌어요. 선택한 날짜를 한 번 더 누르면 이름을 바꿀 수 있어요.', '장소 사이에 <b>이동 거리·시간</b>이 나와요. 초록 <b>여유</b>면 넉넉하고, 빨간 <b>부족</b>이면 시간을 조정하세요.', '<b>길찾기</b>를 누르면 구글맵(해외)·카카오맵(국내) 길안내가 열려요.'] },
   { t: '장소 추가하기', lead: '지도를 탭하거나 검색해서 찾은 곳을 시간과 함께 넣어요.',
     stage: () => `<div class="gp sm">${gMap(true, false)}${gTop()}<span class="g-pin red" style="left:62%;top:44%"></span>${gCall(1, 80, 38)}<div class="g-pop" style="left:22%;top:15%"><b>Menega Cafe</b><span class="g-btn pri">+ 동선에 추가${T}</span></div></div>${gArrow()}<div class="gp sm">${gMap(false, false)}<div class="g-scrim"></div><div class="g-dlg" style="top:14%"><b style="display:block;font-size:1.2em;margin-bottom:.6em">동선에 추가</b><div class="g-field"><span>장소 이름</span><div>Menega Cafe</div></div><div class="g-row"><div class="g-field" style="flex:1;margin:0"><span>시작</span><div>17:20</div></div><div class="g-field" style="flex:1;margin:0"><span>끝(선택)</span><div>19:40</div></div></div><span class="g-btn pri" style="display:block;text-align:center;margin-top:.4em">추가${C(2)}</span></div></div>`,
     steps: ['<b>지도를 탭</b>하면 빨간 핀이 꽂히고 장소 이름을 알려줘요. 위 <b>검색창</b>으로 찾아도 돼요.', '<b>동선에 추가</b>를 누르고 시작·끝 시간을 넣으면 시간순으로 자리 잡아요.', '이미 있는 일정과 시간이 겹치면 <b>뒤 일정을 미룰지</b> 물어봐요.'] },
@@ -2464,7 +2478,7 @@ const GUIDE = [
     stage: () => `<div class="gp">${gMap()}<div class="g-sheet" style="--sh:46%">${gHead(0)}<small style="display:block;font-weight:700;color:var(--text-3);margin-bottom:.5em">구글맵으로 보내기</small><div class="g-btns" style="margin:0;gap:.6em .5em"><span class="g-btn pri">🚗 하루 동선 길찾기${C(1)}${T}</span><span class="g-btn">🛵 오토바이로${C(2)}</span><span class="g-btn">📍 내 지도 파일 받기${C(3)}</span><span class="g-btn">구글 내 지도 열기</span></div></div></div>`,
     steps: ['<b>하루 동선 길찾기</b>: 그날 장소 전체를 경유지로 넣은 구글맵 길안내가 열려요.', '<b>오토바이로</b>: 발리 현지에서 오토바이 경로로 안내받아요.', '<b>내 지도 파일 받기</b> → 구글 내 지도에서 가져오기 하면, 구글맵 앱 <b>저장됨 → 지도</b>에서 전체 일정을 볼 수 있어요.'] },
   { t: '화면 다루기', lead: '마지막이에요! 패널 크기와 지도 버튼, 이 설명서 다시 보는 법이에요.',
-    stage: () => `<div class="gp">${gMap()}${gTop({ help: true, helpCall: 3 })}${gFab(4.4, '<path d="m12 2 10 5-10 5L2 7l10-5z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>', C(2, 'l'))}${gFab(7.6, '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>')}${gFab(10.8, '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/>')}<span class="g-drag" style="left:46%;top:58%">⇕</span><div class="g-sheet" style="--sh:30%">${gHead(0, { handle: C(1) + T })}</div></div>`,
+    stage: () => `<div class="gp">${gMap()}${gTop({ help: true, helpCall: 3 })}${gFab(7, '<path d="m12 2 10 5-10 5L2 7l10-5z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>', C(2, 'l'))}${gFab(10.2, '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>')}${gFab(13.4, '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/>')}<span class="g-drag" style="left:46%;top:58%">⇕</span><div class="g-sheet" style="--sh:30%">${gHead(0, { handle: C(1) + T })}</div></div>`,
     steps: ['패널 위 <b>손잡이를 위아래로 끌면</b> 크게·중간·작게 바뀌어요. 지도를 넓게 보고 싶을 땐 내려 주세요.', '오른쪽 버튼: <b>지도 종류·화면 테마</b>, <b>전체 동선 보기</b>, <b>내 위치</b>.', '오른쪽 위 <b>사용법</b>을 누르면 이 설명서를 언제든 다시 볼 수 있어요.'] },
 ];
 let gIdx = 0, gScrollT = 0;
@@ -2568,6 +2582,7 @@ function bindUI() {
   bindSheetDrag();
 
   // 패널 내용 (이벤트 위임)
+  $('#tripTop').addEventListener('click', e => { const b = e.target.closest('[data-action="trip"]'); if (b) switchTrip(b.dataset.key); });
   const content = $('#content');
   content.addEventListener('click', e => {
     const a = e.target.closest('[data-action]');
