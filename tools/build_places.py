@@ -1,4 +1,6 @@
-"""발리 장소 오픈 데이터 만들기 (GitHub Actions에서 실행)
+"""여행지(발리·제주) 장소 오픈 데이터 만들기 (GitHub Actions에서 실행)
+
+여행지는 환경변수 TRIP_AREA=bali|jeju 로 고름 (기본 bali)
 
 Overture Maps 'places' GeoParquet → 앱이 읽는 작은 JSON(data/bali-places.json)
 
@@ -22,7 +24,7 @@ import urllib.request
 
 CATS = ['식당', '카페', '여행스팟', '숙소']
 MIN_CONFIDENCE = 0.45
-BBOX = (114.35, -9.0, 115.8, -7.95)  # 서, 남, 동, 북 (발리 섬)
+BBOX = (114.35, -9.0, 115.8, -7.95)  # 서, 남, 동, 북 — configure()가 여행지에 맞게 바꿈
 
 CAFE = {'cafe', 'coffee', 'tea', 'bakery', 'dessert', 'desserts', 'juice', 'ice', 'gelato', 'smoothie', 'patisserie',
         'donut', 'donuts', 'bubble', 'boba', 'cake', 'chocolate', 'creperie'}
@@ -127,8 +129,8 @@ def as_obj(v):
     return v
 
 
-# 발리 여행 지역 (대략적인 직사각형 경계: 서, 남, 동, 북). 앱의 REGIONS와 같은 순서·id
-REGIONS = [
+# 여행 지역 (대략적인 직사각형 경계: 서, 남, 동, 북). 앱의 TRIPS[*].regions와 같은 순서·id
+BALI_REGIONS = [
     ('seminyak', '스미냑·르기안', '스미냑', 'Seminyak·Legian', (115.145, -8.715, 115.182, -8.665)),
     ('kuta', '꾸따', '꾸따', 'Kuta', (115.160, -8.760, 115.190, -8.715)),
     ('canggu', '짱구', '짱구', 'Canggu', (115.110, -8.665, 115.160, -8.615)),
@@ -147,6 +149,42 @@ REGIONS = [
     ('lovina', '로비나', '로비나', 'Lovina', (114.950, -8.200, 115.100, -8.130)),
     ('nusapenida', '누사페니다', '누사페니다', 'Nusa Penida·Lembongan', (115.420, -8.850, 115.630, -8.660)),
 ]
+
+
+JEJU_REGIONS = [
+    ('jejusi', '제주시내·공항', '제주시', 'Jeju City', (126.450, 33.470, 126.580, 33.530)),
+    ('jocheon', '조천·함덕', '함덕', 'Jocheon·Hamdeok', (126.580, 33.480, 126.730, 33.560)),
+    ('gujwa', '구좌·월정·세화', '월정리', 'Gujwa·Woljeong', (126.730, 33.450, 126.900, 33.570)),
+    ('seongsan', '성산·우도', '성산', 'Seongsan·Udo', (126.850, 33.380, 126.980, 33.530)),
+    ('pyoseon', '표선', '표선', 'Pyoseon', (126.750, 33.300, 126.850, 33.420)),
+    ('namwon', '남원·위미', '남원', 'Namwon·Wimi', (126.620, 33.240, 126.750, 33.330)),
+    ('seogwipo', '서귀포시내', '서귀포', 'Seogwipo', (126.500, 33.220, 126.620, 33.270)),
+    ('jungmun', '중문', '중문', 'Jungmun', (126.380, 33.220, 126.500, 33.270)),
+    ('andeok', '안덕·산방산', '산방산', 'Andeok·Sanbangsan', (126.250, 33.200, 126.380, 33.300)),
+    ('daejeong', '대정·모슬포', '모슬포', 'Daejeong·Moseulpo', (126.150, 33.190, 126.250, 33.300)),
+    ('hangyeong', '한경·고산', '고산', 'Hangyeong·Gosan', (126.150, 33.300, 126.230, 33.380)),
+    ('hallim', '한림·협재', '협재', 'Hallim·Hyeopjae', (126.230, 33.360, 126.320, 33.430)),
+    ('aewol', '애월', '애월', 'Aewol', (126.300, 33.420, 126.450, 33.500)),
+    ('hallasan', '한라산·중산간', '한라산', 'Hallasan', (126.400, 33.300, 126.700, 33.420)),
+]
+AREAS = {
+    'bali': {'bbox': (114.35, -9.0, 115.8, -7.95), 'regions': BALI_REGIONS, 'suffix': '발리', 'min_places': 1000},
+    'jeju': {'bbox': (126.10, 33.10, 127.00, 33.60), 'regions': JEJU_REGIONS, 'suffix': '제주', 'min_places': 300},
+}
+AREA = 'bali'
+REGIONS = BALI_REGIONS
+NAVER_SUFFIX = '발리'
+MIN_PLACES = 1000
+
+
+def configure(area):
+    """여행지 설정을 전역값으로 적용"""
+    global AREA, BBOX, REGIONS, NAVER_SUFFIX, MIN_PLACES
+    cfg = AREAS[area]
+    AREA, BBOX, REGIONS, NAVER_SUFFIX, MIN_PLACES = area, cfg['bbox'], cfg['regions'], cfg['suffix'], cfg['min_places']
+
+
+configure(os.environ.get('TRIP_AREA', 'bali'))
 
 
 def region_of(lat, lng):
@@ -282,7 +320,9 @@ GENERIC = {'warung', 'cafe', 'coffee', 'kopi', 'restaurant', 'resto', 'bar', 'ki
            'pura', 'temple', 'hotel', 'resort', 'homestay', 'guest', 'inn', 'bistro', 'lounge', 'eatery', 'babi',
            'nasi', 'ayam', 'ikan', 'mie', 'sate', 'seafood', 'pizza', 'burger', 'juice', 'tea', 'co', 'by', 'de',
            'la', 'le', 'di', 'jl', 'jalan', 'kuta', 'ubud', 'canggu', 'seminyak', 'sanur', 'denpasar', 'jimbaran',
-           'pantai', 'objek', 'wisata', 'kawasan', 'luar', 'tempio', 'tempel', 'desa', 'adat', 'dalem', 'agung'}
+           'pantai', 'objek', 'wisata', 'kawasan', 'luar', 'tempio', 'tempel', 'desa', 'adat', 'dalem', 'agung',
+           'jeju', 'seogwipo', '제주', '제주도', '제주점', '서귀포', '식당', '카페', '맛집', '횟집', '본점', '해수욕장',
+           '해변', '공원', '흑돼지', '고기국수', '해장국', '펜션', '호텔', '리조트', '게스트하우스', '편의점'}
 
 
 def words(name):
@@ -290,7 +330,8 @@ def words(name):
 
 
 def distinctive(name):
-    return [w for w in words(name) if w not in GENERIC and len(w) >= 3]
+    # 한글은 두 글자도 고유한 이름이 많아서(예: 우진, 명진) 2자 이상, 영문은 3자 이상
+    return [w for w in words(name) if w not in GENERIC and (len(w) >= 3 or (len(w) == 2 and re.match('[가-힣]', w)))]
 
 
 def hav_m(a_lat, a_lng, b_lat, b_lng):
@@ -325,7 +366,7 @@ def match_wiki(places, wiki):
 
 # ---------------- 네이버 블로그 언급 수 (B) ----------------
 def naver_query(p):
-    return f'"{p["name"]}" 발리'
+    return f'"{p["name"]}" {NAVER_SUFFIX}'
 
 
 def naver_total(query, cid, secret, mode):
@@ -396,7 +437,9 @@ def update_naver(places, counts, limit, cid, secret, fetch=naver_total, sleep=0.
 # ---------------- 합산 점수 ----------------
 CHAINS = re.compile(r"\b(mcd|mcdonald'?s?|kfc|burger king|starbucks|domino'?s|pizza hut|j\.?\s?co|black canyon|subway|a&w|"
                     r"texas chicken|ack fried|solaria|hokben|chatime|circle k|indomaret|alfamart|upnormal|richeese|"
-                    r"wendy'?s|baskin|dunkin|janji jiwa|kopi kenangan|point coffee|fore coffee|excelso|gloria jean'?s)\b", re.I)
+                    r"wendy'?s|baskin|dunkin|janji jiwa|kopi kenangan|point coffee|fore coffee|excelso|gloria jean'?s|"
+                    r"스타벅스|이디야|투썸|맥도날드|롯데리아|버거킹|파리바게뜨|뚜레쥬르|메가커피|메가mgc|빽다방|컴포즈|"
+                    r"할리스|탐앤탐스|폴바셋|공차|배스킨|던킨|맘스터치|bbq|bhc|교촌|굽네|서브웨이)", re.I)
 
 
 def a_raw(p):
@@ -435,6 +478,8 @@ def merge_dup_spots(places):
 
 def pct_ranks(vals):
     """값 → 0~1 백분위 (같은 값은 평균 순위)"""
+    if len(vals) == 1:
+        return [0.5]
     order = sorted(range(len(vals)), key=lambda i: vals[i])
     out = [0.0] * len(vals)
     i = 0
@@ -524,15 +569,15 @@ def main():
         places, n = extract(read_parquet_rows(sys.argv[2]))
         by_cat = {c: sum(1 for p in places if p['ci'] == i) for i, c in enumerate(CATS)}
         in_regions = sum(1 for p in places if p['region'] >= 0)
-        gh('notice', f'rows={n} kept={len(places)} by_cat={by_cat} in_regions={in_regions}')
-        if len(places) < 1000:
+        gh('notice', f'[{AREA}] rows={n} kept={len(places)} by_cat={by_cat} in_regions={in_regions}')
+        if len(places) < MIN_PLACES:
             gh('error', f'too few places ({len(places)}) - schema change?')
             sys.exit(1)
         save_json(sys.argv[3], places)
     elif cmd == 'wiki':
         try:
             wiki = fetch_wiki()
-            gh('notice', f'wikidata items={len(wiki)}')
+            gh('notice', f'[{AREA}] wikidata items={len(wiki)}')
         except Exception as e:
             gh('warning', f'wikidata skipped: {e}')
             wiki = []
@@ -552,10 +597,10 @@ def main():
             sys.exit(1)
         finally:
             save_json(sys.argv[3], counts, compact=False)
-        gh('notice', f'naver: queried={done}/{todo} fails={fails} cached={len(counts)}')
+        gh('notice', f'[{AREA}] naver: queried={done}/{todo} fails={fails} cached={len(counts)}')
     elif cmd == 'final':
         places = load_json(sys.argv[2], [])
-        if len(places) < 1000:
+        if len(places) < MIN_PLACES:
             gh('error', '추출된 장소가 없어 앱용 JSON을 만들지 않음 (기존 파일 유지)')
             sys.exit(1)
         wiki = load_json(sys.argv[3], [])
@@ -564,7 +609,7 @@ def main():
         wiki_hits = sum(1 for p in places if p.get('wiki'))
         with_blog = sum(1 for r in out['p'] if r[8] is not None)
         save_json(sys.argv[5], out)
-        gh('notice', f'final: places={len(out["p"])} wiki_matched={wiki_hits} with_blog_counts={with_blog} '
+        gh('notice', f'[{AREA}] final: places={len(out["p"])} wiki_matched={wiki_hits} with_blog_counts={with_blog} '
                      f'size={os.path.getsize(sys.argv[5]) // 1024}KB')
     else:
         sys.exit(f'unknown command {cmd}')

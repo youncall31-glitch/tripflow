@@ -1,21 +1,21 @@
-name: 발리 장소 데이터 만들기
+name: 여행지 장소 데이터 만들기 (발리·제주)
 
-# 발리 식당·카페·관광지·숙소 + 인기 점수 → data/bali-places.json
+# 여행지별 식당·카페·관광지·숙소 + 인기 점수 → data/<여행지>-places.json
 #  A. 공개 데이터 인지도: Overture Maps(등록 서비스 수·웹/SNS), 위키데이터(위키백과 언어 수)
 #  B. 한국 블로그 언급 수: 네이버 블로그 검색 결과 수 (저장소 Settings → Secrets 의 NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 사용,
-#     키는 이 작업 안에서만 쓰이고 앱·저장소에는 남지 않음. 하루 25,000회 한도라 여러 번에 나눠 채움)
+#     키는 이 작업 안에서만 쓰이고 앱·저장소에는 남지 않음. 하루 25,000회 한도를 두 여행지가 나눠 씀)
 # 실행: 수동(Actions 탭 → Run workflow), 스크립트 변경 시, 매주 월요일 자동
 on:
   workflow_dispatch:
     inputs:
       naver_limit:
-        description: '이번에 조회할 네이버 검색 횟수 (하루 최대 25,000)'
+        description: '여행지 하나당 이번에 조회할 네이버 검색 횟수 (두 여행지 합쳐 하루 25,000 이하)'
         required: false
-        default: '20000'
+        default: '12000'
   push:
     branches: [main]
     paths:
-      - 'tools/build_bali_places.py'
+      - 'tools/build_places.py'
       - '.github/workflows/bali-places.yml'
   schedule:
     - cron: '17 18 * * 0'   # 매주 월요일 03:17 (한국 시간)
@@ -25,13 +25,13 @@ permissions:
   pages: write
 
 concurrency:
-  group: bali-places
+  group: trip-places
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
 
@@ -42,36 +42,43 @@ jobs:
       - name: 도구 설치
         run: pip install --quiet overturemaps pyarrow
 
-      - name: 발리 장소 내려받기 (Overture Maps 최신 릴리스)
-        run: overturemaps download --bbox=114.35,-9.0,115.8,-7.95 -f geoparquet --type=place -o /tmp/bali.parquet
-
-      - name: 장소 추출 + 인지도 재료(A)
-        run: python -B tools/build_bali_places.py extract /tmp/bali.parquet /tmp/places.json
-
-      - name: 위키데이터 (관광지 인지도)
-        run: python -B tools/build_bali_places.py wiki /tmp/wiki.json
-
-      - name: 네이버 블로그 언급 수(B)
+      - name: 여행지별 데이터 만들기
         env:
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           NAVER_API: ${{ vars.NAVER_API }}
-        run: python -B tools/build_bali_places.py naver /tmp/places.json data/naver-counts.json "${{ github.event.inputs.naver_limit || '20000' }}"
-
-      - name: 합산 인기 점수 → 앱용 JSON
-        if: always()   # 네이버 단계가 한도 초과로 멈춰도, 그때까지 모은 값으로 점수 계산
+          LIMIT: ${{ github.event.inputs.naver_limit || '12000' }}
         run: |
           RELEASE=$(pip show overturemaps | awk '/^Version/{print "overturemaps-py " $2}')
-          python -B tools/build_bali_places.py final /tmp/places.json /tmp/wiki.json data/naver-counts.json data/bali-places.json "$RELEASE"
+          FAILED=0
+          for AREA in bali jeju; do
+            case "$AREA" in
+              bali) BBOX="114.35,-9.0,115.8,-7.95" ;;
+              jeju) BBOX="126.10,33.10,127.00,33.60" ;;
+            esac
+            export TRIP_AREA="$AREA"
+            echo "::group::$AREA"
+            if overturemaps download --bbox="$BBOX" -f geoparquet --type=place -o "/tmp/$AREA.parquet" \
+               && python -B tools/build_places.py extract "/tmp/$AREA.parquet" "/tmp/$AREA-places.json"; then
+              python -B tools/build_places.py wiki "/tmp/$AREA-wiki.json"
+              python -B tools/build_places.py naver "/tmp/$AREA-places.json" "data/naver-counts-$AREA.json" "$LIMIT" || FAILED=1
+              # 네이버가 한도 초과로 멈춰도 그때까지 모은 값으로 점수 계산
+              python -B tools/build_places.py final "/tmp/$AREA-places.json" "/tmp/$AREA-wiki.json" "data/naver-counts-$AREA.json" "data/$AREA-places.json" "$RELEASE" || FAILED=1
+            else
+              FAILED=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $FAILED
 
       - name: 저장소에 반영
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/bali-places.json data/naver-counts.json 2>/dev/null || git add data/bali-places.json
+          git add data/*-places.json data/naver-counts-*.json 2>/dev/null || true
           if git diff --cached --quiet; then echo "변경 없음"; exit 0; fi
-          git commit -m "발리 장소 데이터 갱신 ($(date -u +%Y-%m-%d))"
+          git commit -m "여행지 장소 데이터 갱신 ($(date -u +%Y-%m-%d))"
           git pull --rebase --quiet origin main
           git push
 
