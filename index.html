@@ -87,8 +87,10 @@ a{color:inherit;text-decoration:none;touch-action:manipulation}
 #map{position:absolute;inset:0;z-index:0;background:var(--surface-3)}
 
 /* 상단 검색 */
-.topbar{position:absolute;z-index:40;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 10px) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));pointer-events:none}
-.search-wrap{position:relative;max-width:560px;pointer-events:auto}
+.topbar{position:absolute;z-index:40;top:0;left:0;right:0;display:flex;align-items:flex-start;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));pointer-events:none}
+.search-wrap{position:relative;flex:1;min-width:0;max-width:560px;pointer-events:auto}
+.help-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;flex:none;width:54px;height:50px;border-radius:18px;background:var(--surface);color:var(--accent-ink);box-shadow:var(--shadow);font-size:11.5px;font-weight:800;pointer-events:auto}
+.help-btn .ic{width:21px;height:21px}
 .search{display:flex;align-items:center;gap:2px;height:50px;padding:0 5px 0 12px;background:var(--surface);border-radius:25px;box-shadow:var(--shadow)}
 .brand{display:grid;place-items:center;width:28px;flex:none;color:var(--accent)}
 .brand .ic{width:22px;height:22px}
@@ -297,6 +299,126 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
 .btn{flex:1;height:52px;border-radius:15px;background:var(--surface-2);color:var(--text);font-size:16px;font-weight:700}
 .btn.primary{background:var(--accent);color:var(--on-accent)}
 
+/* ===================== 사용 설명서 ===================== */
+#guide{width:min(460px,100%);height:min(calc(100% - 40px),820px);max-height:100dvh;margin:auto;padding:0}
+#guide::backdrop{background:var(--scrim)}
+.g-wrap{display:flex;flex-direction:column;height:100%;background:var(--surface);border-radius:24px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+@media (max-width:520px){#guide{width:100%;height:100%;max-width:100%}.g-wrap{border-radius:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}}
+.g-head{display:flex;align-items:center;justify-content:space-between;padding:12px 10px 4px 20px}
+.g-head h2{margin:0;font-size:17px}
+.g-count{font-size:12.5px;font-weight:700;color:var(--text-3)}
+.g-track{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.g-track::-webkit-scrollbar{display:none}
+.g-track:focus{outline:0}
+.g-slide{flex:0 0 100%;min-width:0;scroll-snap-align:center;overflow-y:auto;padding:4px 20px 12px}
+.g-slide h3{margin:2px 0 4px;font-size:21px;line-height:1.3;word-break:keep-all}
+.g-lead{margin:0 0 12px;font-size:14.5px;color:var(--text-2);word-break:keep-all}
+.g-stage{display:flex;align-items:center;justify-content:center;gap:6px;margin:4px 0 14px;padding:14px 8px;border-radius:20px;background:linear-gradient(160deg,var(--accent-soft),var(--surface-2))}
+.g-arrow{display:flex;flex-direction:column;align-items:center;gap:2px;flex:none;color:var(--accent-ink);font-size:11px;font-weight:800}
+.g-arrow svg{width:22px;height:22px}
+.g-steps{margin:0;padding:0;list-style:none;counter-reset:g}
+.g-steps li{position:relative;margin:0 0 9px;padding-left:32px;font-size:14.5px;line-height:1.5;color:var(--text-2);word-break:keep-all}
+.g-steps li::before{counter-increment:g;content:counter(g);position:absolute;left:0;top:1px;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#facc15;color:#111827;font-size:12.5px;font-weight:800}
+.g-steps b{color:var(--text)}
+.g-dots{display:flex;justify-content:center;gap:6px;padding:8px 0 2px}
+.g-dots button{width:8px;height:8px;padding:0;border-radius:4px;background:var(--grip);transition:width .2s,background .2s}
+.g-dots button[aria-selected="true"]{width:22px;background:var(--accent)}
+.g-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px 16px}
+.g-never{height:44px;padding:0 6px;color:var(--text-3);font-size:14px;font-weight:650;text-decoration:underline;text-underline-offset:3px}
+.g-nav{display:flex;gap:8px}
+.g-nav .btn{flex:none;min-width:84px;height:46px;padding:0 16px}
+.g-nav .btn[hidden]{display:none}
+
+/* --- 예시 화면(미니 휴대폰): em 단위라 크기만 바꾸면 전체가 같이 줄어듦 --- */
+.gp{--w:200px;position:relative;flex:none;width:var(--w);height:calc(var(--w) * 1.62);font-size:calc(var(--w) / 21);border:.45em solid #111827;border-radius:2.4em;overflow:hidden;background:#e7ebe3;box-shadow:0 .8em 2em rgba(15,23,42,.22);font-family:var(--font);line-height:1.25;color:var(--text);user-select:none}
+.gp.sm{--w:142px}
+:root[data-theme="dark"] .gp{background:#1d2836;border-color:#000}
+.gp *{box-sizing:border-box}
+.g-map{position:absolute;inset:0;background:
+  linear-gradient(118deg,transparent 46%,var(--g-road,#fff) 46% 48.5%,transparent 48.5%),
+  linear-gradient(28deg,transparent 58%,var(--g-road,#fff) 58% 60%,transparent 60%),
+  linear-gradient(165deg,transparent 28%,var(--g-road,#fff) 28% 29.6%,transparent 29.6%),
+  radial-gradient(ellipse at 112% 18%,#b9dcf2 0 26%,transparent 26.5%),
+  radial-gradient(ellipse at 20% 30%,#d3e6c8 0 12%,transparent 12.5%)}
+:root[data-theme="dark"] .g-map{--g-road:#324257;background:
+  linear-gradient(118deg,transparent 46%,var(--g-road) 46% 48.5%,transparent 48.5%),
+  linear-gradient(28deg,transparent 58%,var(--g-road) 58% 60%,transparent 60%),
+  linear-gradient(165deg,transparent 28%,var(--g-road) 28% 29.6%,transparent 29.6%),
+  radial-gradient(ellipse at 112% 18%,#163a55 0 26%,transparent 26.5%),
+  radial-gradient(ellipse at 20% 30%,#1f3a2a 0 12%,transparent 12.5%),#1d2836}
+.g-route{position:absolute;inset:0;width:100%;height:100%}
+.g-search{position:absolute;top:1em;left:.9em;right:3.6em;height:2.8em;display:flex;align-items:center;gap:.5em;padding:0 .4em 0 1em;border-radius:1.4em;background:var(--surface);box-shadow:0 .2em .6em rgba(0,0,0,.18);font-size:1em;color:var(--text-3)}
+.g-search i{margin-left:auto;padding:.45em .8em;border-radius:1em;background:var(--accent);color:#fff;font-style:normal;font-weight:800}
+.g-help{position:absolute;top:1em;right:.9em;width:2.4em;height:2.8em;display:grid;place-items:center;border-radius:.9em;background:var(--surface);box-shadow:0 .2em .6em rgba(0,0,0,.18);color:var(--accent-ink);font-weight:900;font-size:1.1em}
+.g-fab{position:absolute;right:.9em;width:2.6em;height:2.6em;border-radius:50%;background:var(--surface);box-shadow:0 .2em .6em rgba(0,0,0,.18)}
+.g-fab svg{width:1.4em;height:1.4em;margin:.6em;fill:none;stroke:var(--text);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.g-pin{position:absolute;display:grid;place-items:center;width:2.3em;height:2.3em;margin:-1.15em 0 0 -1.15em;border:.22em solid #fff;border-radius:50%;background:#2563eb;color:#fff;font-size:1em;font-weight:800;box-shadow:0 .2em .5em rgba(0,0,0,.3)}
+.g-pin.on{background:#ea580c;transform:scale(1.15)}
+.g-pin.red{width:2.1em;height:2.1em;margin:-2.4em 0 0 -1.05em;border-radius:50% 50% 50% 0;background:#e11d48;transform:rotate(-45deg)}
+.g-heat{position:absolute;width:var(--d,1.4em);height:var(--d,1.4em);margin:calc(var(--d,1.4em) / -2) 0 0 calc(var(--d,1.4em) / -2);border:.15em solid #fff;border-radius:50%;background:var(--h);box-shadow:0 .1em .3em rgba(0,0,0,.3)}
+.g-box{position:absolute;border:.18em dashed #dc2626;background:rgba(220,38,38,.06)}
+.g-sheet{position:absolute;left:0;right:0;bottom:0;height:var(--sh,50%);padding:.5em .9em .8em;border-radius:1.6em 1.6em 0 0;background:var(--surface);box-shadow:0 -.3em 1em rgba(0,0,0,.15);overflow:hidden}
+.g-handle{width:3.4em;height:.4em;margin:0 auto .6em;border-radius:.2em;background:var(--grip)}
+.g-row{display:flex;align-items:center;gap:.45em;flex-wrap:nowrap;margin-bottom:.55em}
+.g-stats{font-size:1.15em;font-weight:800}
+.g-seg{display:flex;margin-left:auto;padding:.2em;border-radius:.8em;background:var(--surface-2)}
+.g-seg>span{padding:.3em .55em;border-radius:.6em;font-size:.95em;font-weight:700;color:var(--text-3)}
+.g-seg>span.on{background:var(--surface);color:var(--text);box-shadow:0 .1em .2em rgba(0,0,0,.15)}
+.g-tabs{display:flex;border-bottom:.1em solid var(--line);margin:0 -.9em .6em;padding:0 .5em}
+.g-tabs>span{flex:1;padding:.5em 0;text-align:center;font-size:1em;font-weight:700;color:var(--text-3);border-bottom:.25em solid transparent}
+.g-tabs>span.on{color:var(--accent-ink);border-bottom-color:var(--accent)}
+.g-chip{flex:none;padding:.4em .8em;border:.12em solid var(--line);border-radius:1.2em;font-size:.95em;font-weight:700;color:var(--text-2);white-space:nowrap}
+.g-chip.on{background:var(--text);border-color:var(--text);color:var(--surface)}
+.g-card{position:relative;padding:.7em .8em;border:.14em solid var(--line);border-radius:1.1em;margin-bottom:.4em}
+.g-card.on{border-color:var(--accent);background:var(--accent-soft)}
+.g-card b{display:block;font-size:1.15em}
+.g-card small{display:block;margin-top:.15em;font-size:.95em;color:var(--text-3)}
+.g-num{display:inline-grid;place-items:center;width:1.9em;height:1.9em;border-radius:50%;background:#2563eb;color:#fff;font-size:.95em;font-weight:800;flex:none}
+.g-num.on{background:#ea580c}
+.g-time{padding:.25em .55em;border:.12em solid var(--line);border-radius:.6em;font-size:1em;font-weight:800;background:var(--surface)}
+.g-leg{display:flex;align-items:center;gap:.4em;margin:.1em 0 .4em 1em;padding:.35em 0 .35em .9em;border-left:.2em dashed var(--grip);font-size:.95em;font-weight:700;color:var(--text-2)}
+.g-ok,.g-bad{padding:.15em .5em;border-radius:.5em;font-size:.9em;font-weight:800}
+.g-ok{background:var(--ok-soft);color:var(--ok)}
+.g-bad{background:var(--warn-soft);color:var(--warn)}
+.g-btn{display:inline-block;padding:.45em .7em;border:.12em solid var(--line);border-radius:.8em;background:var(--surface-2);font-size:.95em;font-weight:700;color:var(--text);white-space:nowrap}
+.g-btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.g-btns{display:flex;flex-wrap:wrap;gap:.35em;margin-top:.5em}
+.g-pop{position:absolute;padding:.7em .8em;border-radius:1em;background:var(--surface);box-shadow:0 .3em 1em rgba(0,0,0,.25);font-size:1em;width:12em}
+.g-pop::after{content:"";position:absolute;left:50%;bottom:-.5em;width:1em;height:1em;margin-left:-.5em;background:var(--surface);transform:rotate(45deg)}
+.g-pop b{display:block;font-size:1.1em;margin-bottom:.4em}
+.g-dlg{position:absolute;left:1em;right:1em;top:22%;padding:1em;border-radius:1.3em;background:var(--surface);box-shadow:0 .5em 1.5em rgba(0,0,0,.3)}
+.g-scrim{position:absolute;inset:0;background:rgba(15,23,42,.45)}
+.g-field{margin-bottom:.55em}
+.g-field span{display:block;margin-bottom:.2em;font-size:.85em;font-weight:700;color:var(--text-3)}
+.g-field div{padding:.55em .7em;border:.12em solid var(--line);border-radius:.8em;background:var(--surface-2);font-size:1em;font-weight:650}
+.g-toast{position:absolute;left:.9em;right:.9em;top:4.6em;display:flex;align-items:center;gap:.5em;padding:.7em .8em;border-radius:1em;background:var(--toast-bg);color:var(--toast-ink);font-size:.95em;font-weight:700;box-shadow:0 .3em .8em rgba(0,0,0,.3)}
+.g-toast em{margin-left:auto;font-style:normal;color:var(--toast-act);font-weight:900;white-space:nowrap}
+.g-tile{padding:.6em .7em;border-radius:.9em;background:var(--surface-2);font-size:1em;font-weight:800}
+.g-tile small{display:block;font-weight:600;font-size:.85em;color:var(--text-3)}
+.g-tiles{display:grid;grid-template-columns:1fr 1fr;gap:.45em}
+.g-rank{display:flex;align-items:center;gap:.55em;padding:.45em 0;border-bottom:.1em solid var(--line)}
+.g-rank i{display:grid;place-items:center;flex:none;width:1.9em;height:1.9em;border-radius:50%;background:var(--h);color:#fff;font-style:normal;font-size:.9em;font-weight:800}
+.g-rank b{font-size:1.05em}
+.g-rank small{display:block;font-size:.85em;color:var(--text-3)}
+.g-legend{display:flex;align-items:center;gap:.4em;margin:.2em 0 .4em;font-size:.85em;font-weight:700;color:var(--text-3)}
+.g-legend i{flex:1;height:.6em;border-radius:.3em;background:linear-gradient(90deg,#fecaca,#f87171,#dc2626,#b91c1c,#7f1d1d)}
+.g-note{padding:.55em .7em;border-radius:.9em;background:var(--surface-2);font-size:.9em;font-weight:650;color:var(--text-2);margin-bottom:.5em}
+/* 누르는 곳 표시: 퍼지는 원 + 손가락 */
+.g-tap{position:absolute;width:0;height:0;z-index:5}
+.g-tap::before{content:"";position:absolute;left:-1.6em;top:-1.6em;width:3.2em;height:3.2em;border-radius:50%;border:.25em solid #facc15;box-shadow:0 0 0 .2em rgba(250,204,21,.35);animation:gpulse 1.6s ease-out infinite}
+.g-tap svg{position:absolute;left:-.3em;top:-.1em;width:2.6em;height:2.6em;fill:#fff;stroke:#111827;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 .15em .25em rgba(0,0,0,.35));animation:gpress 1.6s ease-in-out infinite}
+@keyframes gpulse{0%{transform:scale(.55);opacity:1}100%{transform:scale(1.35);opacity:0}}
+@keyframes gpress{0%,100%{transform:translate(.25em,.25em)}45%{transform:translate(0,0)}}
+.g-call{position:absolute;z-index:6;display:grid;place-items:center;width:1.9em;height:1.9em;margin:-.95em 0 0 -.95em;border:.15em solid #fff;border-radius:50%;background:#facc15;color:#111827;font-size:1.05em;font-weight:900;box-shadow:0 .15em .4em rgba(0,0,0,.35)}
+.gp .g-chip,.gp .g-time,.gp .g-btn,.gp .g-tabs>span,.gp .g-note,.gp .g-leg,.gp .g-legend,.gp .g-tile,.gp .g-seg,.gp .g-seg>span,.gp .g-handle,.gp .g-rank,.gp .g-card,.gp .g-stats{position:relative}
+.g-call.tr{left:auto;right:-.75em;top:-.75em;margin:0}
+.g-call.tl{left:-.75em;top:-.75em;margin:0}
+.g-call.r{left:auto;right:-.6em;top:50%;margin:-.95em 0 0}
+.g-call.l{left:-2.3em;top:50%;margin:-.95em 0 0}
+.g-tap.in{left:50%;top:55%}
+.g-drag{position:absolute;z-index:5;color:#facc15;font-size:2em;font-weight:900;text-shadow:0 .05em .15em rgba(0,0,0,.5)}
+@media (prefers-reduced-motion:reduce){.g-tap::before,.g-tap svg{animation:none}}
+
 /* ===================== 토스트 ===================== */
 .toast{position:fixed;z-index:60;left:50%;top:calc(env(safe-area-inset-top) + 70px);display:flex;align-items:center;gap:10px;width:max-content;max-width:calc(100% - 24px);padding:11px 12px 11px 16px;border-radius:16px;background:var(--toast-bg);color:var(--toast-ink);box-shadow:var(--shadow);font-size:14.5px;font-weight:600;line-height:1.35;opacity:0;pointer-events:none;transform:translate(-50%,-8px);transition:opacity .2s,transform .2s}
 .toast.show{opacity:1;transform:translate(-50%,0)} /* 알림 본문은 아래 패널·지도 조작을 막지 않음 */
@@ -368,6 +490,8 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
   <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/></symbol>
   <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></symbol>
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.6 2.3c-.7.4-1.2 1-1.2 1.8v.4M12 17.2h.01"/></symbol>
+  <symbol id="i-hand" viewBox="0 0 24 24"><path d="M9 11.5V5a1.5 1.5 0 0 1 3 0v5.5m0-1.5a1.5 1.5 0 0 1 3 0v2m0-1a1.5 1.5 0 0 1 3 0v4.5a6.5 6.5 0 0 1-6.5 6.5H11a6 6 0 0 1-4.6-2.2l-3-3.7a1.6 1.6 0 0 1 2.4-2.1L9 15.5"/></symbol>
 </svg>
 
 <h1 class="sr">TripFlow 스마트 여행 동선</h1>
@@ -387,6 +511,7 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
         </form>
         <ul class="results" id="results" hidden></ul>
       </div>
+      <button class="help-btn" id="btnGuide" type="button" aria-label="사용법 보기" title="사용법 보기"><svg class="ic"><use href="#i-help"/></svg>사용법</button>
     </div>
 
     <div class="fabs">
@@ -469,6 +594,21 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
       <button class="btn primary" type="submit" id="kSave">저장하고 확인</button>
     </div>
   </form>
+</dialog>
+
+<dialog id="guide" aria-labelledby="gTitle">
+  <div class="g-wrap">
+    <div class="g-head">
+      <div><h2 id="gTitle">TripFlow 사용법</h2><span class="g-count" id="gCount" aria-live="polite"></span></div>
+      <button class="icon-btn" type="button" id="gClose" aria-label="설명서 닫기"><svg class="ic"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="g-track" id="gTrack" tabindex="0" aria-roledescription="슬라이드"></div>
+    <div class="g-dots" id="gDots" role="tablist" aria-label="설명 페이지"></div>
+    <div class="g-foot">
+      <button class="g-never" type="button" id="gNever">다시 보지 않기</button>
+      <div class="g-nav"><button class="btn" type="button" id="gPrev">이전</button><button class="btn primary" type="button" id="gNext" autofocus>다음</button></div>
+    </div>
+  </div>
 </dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button id="toastBtn" type="button" hidden></button></div>
@@ -2200,6 +2340,101 @@ function fitDialog() {
 }
 
 /* =====================================================================
+   11-1. 그림 사용 설명서 (처음 열 때 자동 표시, '다시 보지 않기' 가능)
+   ===================================================================== */
+const GUIDE_KEY = 'tripflow.guide';
+const HAND = '<svg viewBox="0 0 24 24"><use href="#i-hand"/></svg>';
+const gTap = (x, y) => `<span class="g-tap" style="left:${x}%;top:${y}%">${HAND}</span>`;   // 지도 위 위치(%)
+const gCall = (n, x, y) => `<span class="g-call" style="left:${x}%;top:${y}%">${n}</span>`;
+const T = `<span class="g-tap in">${HAND}</span>`;                     // 요소 한가운데를 누르는 손
+const C = (n, pos = 'tr') => `<span class="g-call ${pos}">${n}</span>`; // 요소 모서리에 붙는 번호
+const gArrow = (label = '누르면') => `<div class="g-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>${label}</div>`;
+const gMap = (pins = true, route = true) => `<div class="g-map"></div>${route ? `<svg class="g-route" viewBox="0 0 100 162" preserveAspectRatio="none"><polyline points="30,40 58,62 40,84 72,92" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="30,40 58,62 40,84 72,92" fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}${pins ? `<span class="g-pin on" style="left:30%;top:24.7%">1</span><span class="g-pin" style="left:58%;top:38.3%">2</span><span class="g-pin" style="left:40%;top:51.9%">3</span><span class="g-pin" style="left:72%;top:56.8%">4</span>` : ''}`;
+const gTop = (o = {}) => `<div class="g-search">여행지·맛집 검색<i>검색</i>${o.call ? C(o.call, 'tl') : ''}</div><div class="g-help"${o.help ? ' style="box-shadow:0 0 0 .25em #facc15"' : ''}>?${o.helpCall ? C(o.helpCall, 'tl') : ''}${o.helpTap ? T : ''}</div>`;
+const gHead = (tab = 0, o = {}) => `<div class="g-handle">${o.handle || ''}</div><div class="g-row"><span class="g-stats">12/6 · 6곳 · 62km</span><span class="g-seg"><span class="on">차량</span><span>도보</span></span></div><div class="g-tabs">${['동선', '주변', '지역', '후기'].map((t, i) => `<span${i === tab ? ' class="on"' : ''}>${t}${i === tab && o.tabCall ? C(o.tabCall) : ''}</span>`).join('')}</div>`;
+const gFab = (top, path, extra = '') => `<span class="g-fab" style="top:${top}em"><svg viewBox="0 0 24 24">${path}</svg>${extra}</span>`;
+const GUIDE = [
+  { t: '여행 동선을 한눈에', lead: '지도에서 하루 동선을 보고, 바로 고치고, 주변 인기 장소까지 찾는 앱이에요. 1분이면 다 볼 수 있어요.',
+    stage: () => `<div class="gp">${gMap()}${gTop({ call: 3 })}${gCall(1, 68, 33)}<div class="g-sheet" style="--sh:46%">${gHead(0, { tabCall: 2 })}<div class="g-card on"><div class="g-row" style="margin:0"><span class="g-num on">1</span><span class="g-time">07:30</span><b style="display:inline;font-size:1.05em">Villa Baby</b></div></div></div></div>`,
+    steps: ['<b>지도</b>: 번호 핀이 방문 순서, 파란 선이 실제 이동 경로예요.', '<b>아래 패널</b>: 동선·주변·지역·후기 네 가지 탭으로 나뉘어요.', '<b>검색창</b>: 가고 싶은 곳을 검색해서 바로 일정에 넣어요.'] },
+  { t: '날짜별 동선과 이동 시간', lead: '날짜 버튼으로 하루씩 보고, 장소 사이 이동 시간이 계획에 맞는지 바로 확인해요.',
+    stage: () => `<div class="gp">${gMap()}<div class="g-sheet" style="--sh:64%">${gHead(0)}<div class="g-row"><span class="g-chip">12/6 (토)</span><span class="g-chip on">12/7 (일)${C(1)}${T}</span><span class="g-chip">+ 날짜</span></div><div class="g-card"><div class="g-row" style="margin:0"><span class="g-num">2</span><span class="g-time">10:10</span><b style="display:inline;font-size:1.05em">바투바락</b></div></div><div class="g-leg">🚗 2.1km · 7분 <span class="g-ok">여유 23분</span></div><div class="g-leg">🚗 18km · 52분 <span class="g-bad">12분 부족${C(2)}</span><span class="g-btn" style="margin-left:auto">길찾기${C(3)}</span></div></div></div>`,
+    steps: ['<b>날짜 버튼</b>을 누르면 그날 일정과 지도가 바뀌어요. 선택한 날짜를 한 번 더 누르면 이름을 바꿀 수 있어요.', '장소 사이에 <b>이동 거리·시간</b>이 나와요. 초록 <b>여유</b>면 넉넉하고, 빨간 <b>부족</b>이면 시간을 조정하세요.', '<b>길찾기</b>를 누르면 구글맵(해외)·카카오맵(국내) 길안내가 열려요.'] },
+  { t: '장소 추가하기', lead: '지도를 탭하거나 검색해서 찾은 곳을 시간과 함께 넣어요.',
+    stage: () => `<div class="gp sm">${gMap(true, false)}${gTop()}<span class="g-pin red" style="left:62%;top:44%"></span>${gCall(1, 80, 38)}<div class="g-pop" style="left:22%;top:15%"><b>Menega Cafe</b><span class="g-btn pri">+ 동선에 추가${T}</span></div></div>${gArrow()}<div class="gp sm">${gMap(false, false)}<div class="g-scrim"></div><div class="g-dlg" style="top:14%"><b style="display:block;font-size:1.2em;margin-bottom:.6em">동선에 추가</b><div class="g-field"><span>장소 이름</span><div>Menega Cafe</div></div><div class="g-row"><div class="g-field" style="flex:1;margin:0"><span>시작</span><div>17:20</div></div><div class="g-field" style="flex:1;margin:0"><span>끝(선택)</span><div>19:40</div></div></div><span class="g-btn pri" style="display:block;text-align:center;margin-top:.4em">추가${C(2)}</span></div></div>`,
+    steps: ['<b>지도를 탭</b>하면 빨간 핀이 꽂히고 장소 이름을 알려줘요. 위 <b>검색창</b>으로 찾아도 돼요.', '<b>동선에 추가</b>를 누르고 시작·끝 시간을 넣으면 시간순으로 자리 잡아요.', '이미 있는 일정과 시간이 겹치면 <b>뒤 일정을 미룰지</b> 물어봐요.'] },
+  { t: '일정 고치기', lead: '시간, 위치, 내용을 바로 고치고, 실수해도 되돌릴 수 있어요.',
+    stage: () => `<div class="gp">${gMap()}<span class="g-drag" style="left:36%;top:15%">⤢</span>${gCall(2, 20, 20)}<div class="g-toast" style="top:auto;bottom:52%">뒤 일정 3곳도 30분 밀까요?<em style="position:relative">밀기${C(3, 'tl')}</em></div><div class="g-sheet" style="--sh:48%">${gHead(0)}<div class="g-card on"><div class="g-row" style="margin:0"><span class="g-num on">1</span><span class="g-time" style="box-shadow:0 0 0 .2em #facc15">12:10${C(1)}${T}</span><span class="g-btn" style="margin-left:auto">식당</span></div><b style="margin-top:.3em">Palmilla Beach Club</b><div class="g-btns"><span class="g-btn">주변</span><span class="g-btn">후기</span><span class="g-btn">수정</span><span class="g-btn">구글맵</span></div></div></div></div>`,
+    steps: ['<b>시간 칸</b>을 눌러 바꾸면 자동으로 다시 정렬돼요. 늦추면 <b>뒤 일정도 같이 밀기</b>를 한 번에 할 수 있어요.', '선택한 장소의 <b>주황 핀을 길게 눌러 끌면</b> 위치가 옮겨져요. (숙소처럼 위치가 정확하지 않을 때)', '바꾼 뒤 나오는 알림에서 <b>밀기·되돌리기</b>를 고를 수 있어요. 이름·메모는 <b>수정</b>에서 바꿔요.'] },
+  { t: '시간이 붕 떴을 때: 주변', lead: '일정 장소 또는 내 현재 위치 기준으로 근처 식당·카페·명소를 찾아요.',
+    stage: () => `<div class="gp">${gMap(true, false)}<span class="g-heat" style="left:66%;top:30%;--h:#ea580c;--d:1.5em"></span><span class="g-heat" style="left:48%;top:20%;--h:#9333ea;--d:1.5em"></span><div class="g-sheet" style="--sh:64%">${gHead(1)}<div class="g-row"><span class="g-seg" style="margin:0"><span>일정 기준</span><span class="on">내 위치${C(1)}${T}</span></span></div><div class="g-note">⏱ 다음 일정 14:40까지 <b>1시간 30분</b> · 걸어서 다녀올 수 있는 2.3km 이내만 보여요${C(2)}</div><div class="g-row" style="flex-wrap:wrap"><span style="font-size:.9em;font-weight:700;color:var(--text-3)">구글맵에서 별점 보며 찾기</span><span class="g-btn">맛집${C(3)}</span><span class="g-btn">카페</span><span class="g-btn">관광지</span></div></div></div>`,
+    steps: ['<b>내 위치</b>를 누르면 지금 있는 곳 근처를 보여줘요. (일정 기준은 선택한 일정 장소 주변)', '<b>다음 일정까지 남은 시간</b>을 계산해서, 다녀올 수 있는 거리 안의 곳만 골라줘요.', '<b>구글맵 버튼</b>으로 그 자리 주변 맛집·카페·관광지를 별점과 리뷰 수까지 확인해요.'] },
+  { t: '지역별 인기 장소', lead: '발리를 17개 지역으로 나눴어요. 지역을 고르면 유명한 곳일수록 진한 빨강으로 보여요.',
+    stage: () => `<div class="gp">${gMap(false, false)}<div class="g-box" style="left:18%;top:7%;width:62%;height:28%"></div>${[[30, 14, 0], [52, 20, 0], [64, 12, 1], [40, 26, 1], [70, 28, 2], [26, 31, 2], [58, 31, 3], [46, 10, 3], [74, 18, 4], [34, 20, 4]].map(([x, y, l]) => `<span class="g-heat" style="left:${x}%;top:${y}%;--h:${HEAT[l]};--d:${[1.9, 1.6, 1.35, 1.15, 1][l]}em"></span>`).join('')}<div class="g-sheet" style="--sh:62%">${gHead(2)}<div class="g-row"><span class="g-chip on">짐바란${C(1)}${T}</span><span class="g-chip on">울루와뚜</span><span class="g-chip">우붓</span></div><div class="g-row"><span class="g-seg" style="margin:0;flex:1;justify-content:space-around"><span class="on">식당</span><span>카페</span><span>관광지${C(2)}</span></span></div><div class="g-legend">덜 유명<i></i>유명${C(3)}</div><div class="g-rank"><i style="--h:#7f1d1d">1</i><div><b>Menega Cafe</b><small>해산물 · 블로그 950건</small></div></div><div class="g-rank"><i style="--h:#b91c1c">2</i><div><b>Sundara</b><small>식당 · 블로그 410건</small></div></div></div></div>`,
+    steps: ['<b>지역 버튼</b>을 누르면 지도에 그 지역 경계와 인기 장소가 표시돼요. 여러 지역을 고르면 범위와 개수가 넓이만큼 늘어나요.', '<b>식당·카페·관광지</b>를 바꿔 가며 볼 수 있어요.', '<b>진할수록 유명</b>해요. 공개 지도 데이터 인지도와 네이버 블로그 언급 수를 합친 순위예요. 목록에서 바로 일정에 넣을 수 있어요.'] },
+  { t: '후기 찾아보기', lead: '선택한 일정 장소의 블로그 후기와 지도 리뷰를 한 번에 열어요.',
+    stage: () => `<div class="gp">${gMap()}<div class="g-sheet" style="--sh:62%">${gHead(3)}<b style="display:block;font-size:1.15em;margin-bottom:.3em">4. Menega Cafe</b><div class="g-row" style="justify-content:space-between"><small style="color:var(--text-3)">블로그 정렬</small><span class="g-seg" style="margin:0"><span>최신순</span><span class="on">관련도순${C(2)}</span></span></div><div class="g-tiles"><div class="g-tile" style="grid-column:1/-1">📖 Menega Cafe 후기<small>네이버 블로그</small></div><div class="g-tile">🍴 짐바란 맛집<small>네이버 블로그</small>${C(1)}${T}</div><div class="g-tile">☕ 짐바란 카페<small>네이버 블로그</small></div><div class="g-tile">🗺️ 가볼만한곳<small>네이버 블로그</small></div><div class="g-tile">📍 구글 지도 리뷰<small>Google 지도</small></div></div></div></div>`,
+    steps: ['버튼을 누르면 <b>네이버 블로그·구글 지도</b>의 실제 검색 결과가 새 창으로 열려요. 발리는 "짐바란 맛집"처럼 <b>지역 이름</b>으로 찾아줘요.', '<b>관련도순</b>은 많이 언급된 글, <b>최신순</b>은 최근 글이 먼저 나와요.'] },
+  { t: '구글맵으로 보내기', lead: '짠 동선을 구글맵으로 그대로 넘겨 길안내를 받거나 저장해요.',
+    stage: () => `<div class="gp">${gMap()}<div class="g-sheet" style="--sh:46%">${gHead(0)}<small style="display:block;font-weight:700;color:var(--text-3);margin-bottom:.5em">구글맵으로 보내기</small><div class="g-btns" style="margin:0;gap:.6em .5em"><span class="g-btn pri">🚗 하루 동선 길찾기${C(1)}${T}</span><span class="g-btn">🛵 오토바이로${C(2)}</span><span class="g-btn">📍 내 지도 파일 받기${C(3)}</span><span class="g-btn">구글 내 지도 열기</span></div></div></div>`,
+    steps: ['<b>하루 동선 길찾기</b>: 그날 장소 전체를 경유지로 넣은 구글맵 길안내가 열려요.', '<b>오토바이로</b>: 발리 현지에서 오토바이 경로로 안내받아요.', '<b>내 지도 파일 받기</b> → 구글 내 지도에서 가져오기 하면, 구글맵 앱 <b>저장됨 → 지도</b>에서 전체 일정을 볼 수 있어요.'] },
+  { t: '화면 다루기', lead: '마지막이에요! 패널 크기와 지도 버튼, 이 설명서 다시 보는 법이에요.',
+    stage: () => `<div class="gp">${gMap()}${gTop({ help: true, helpCall: 3 })}${gFab(4.4, '<path d="m12 2 10 5-10 5L2 7l10-5z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>', C(2, 'l'))}${gFab(7.6, '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>')}${gFab(10.8, '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/>')}<span class="g-drag" style="left:46%;top:58%">⇕</span><div class="g-sheet" style="--sh:30%">${gHead(0, { handle: C(1) + T })}</div></div>`,
+    steps: ['패널 위 <b>손잡이를 위아래로 끌면</b> 크게·중간·작게 바뀌어요. 지도를 넓게 보고 싶을 땐 내려 주세요.', '오른쪽 버튼: <b>지도 종류·화면 테마</b>, <b>전체 동선 보기</b>, <b>내 위치</b>.', '오른쪽 위 <b>사용법</b>을 누르면 이 설명서를 언제든 다시 볼 수 있어요.'] },
+];
+let gIdx = 0, gScrollT = 0;
+function renderGuide() {
+  $('#gTrack').innerHTML = GUIDE.map((g, i) => `<section class="g-slide" role="group" aria-roledescription="슬라이드" aria-label="${i + 1} / ${GUIDE.length}: ${esc(g.t)}">
+      <h3>${esc(g.t)}</h3><p class="g-lead">${esc(g.lead)}</p>
+      <div class="g-stage" aria-hidden="true">${g.stage()}</div>
+      <ol class="g-steps">${g.steps.map(x => `<li>${x}</li>`).join('')}</ol>
+    </section>`).join('');
+  $('#gDots').innerHTML = GUIDE.map((g, i) => `<button type="button" role="tab" aria-label="${i + 1}번째: ${esc(g.t)}" data-i="${i}"></button>`).join('');
+}
+function guideUI() {
+  $('#gCount').textContent = `${gIdx + 1} / ${GUIDE.length}`;
+  $('#gPrev').hidden = gIdx === 0;
+  $('#gNext').textContent = gIdx === GUIDE.length - 1 ? '시작하기' : '다음';
+  document.querySelectorAll('#gDots button').forEach((b, i) => b.setAttribute('aria-selected', String(i === gIdx)));
+}
+function guideGo(i, smooth = true) {
+  gIdx = clamp(i, 0, GUIDE.length - 1);
+  const tr = $('#gTrack');
+  tr.scrollTo({ left: gIdx * tr.clientWidth, behavior: smooth && !REDUCED ? 'smooth' : 'auto' });
+  guideUI();
+}
+function openGuide() {
+  const dlg = $('#guide');
+  if (dlg.open) return;
+  closeMenu(); hideResults();
+  if (!$('#gTrack').children.length) renderGuide();
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  requestAnimationFrame(() => guideGo(0, false));
+}
+function closeGuide(never) {
+  if (never) { try { localStorage.setItem(GUIDE_KEY, 'hide'); } catch (e) { /* 저장 불가 */ } toast('설명서는 오른쪽 위 ‘사용법’에서 다시 볼 수 있어요'); }
+  const dlg = $('#guide');
+  if (dlg.open) dlg.close();
+}
+const guideHidden = () => { try { return localStorage.getItem(GUIDE_KEY) === 'hide'; } catch (e) { return false; } };
+function bindGuide() {
+  $('#btnGuide').addEventListener('click', openGuide);
+  $('#gClose').addEventListener('click', () => closeGuide(false));
+  $('#gNever').addEventListener('click', () => closeGuide(true));
+  $('#gPrev').addEventListener('click', () => guideGo(gIdx - 1));
+  $('#gNext').addEventListener('click', () => (gIdx === GUIDE.length - 1 ? closeGuide(false) : guideGo(gIdx + 1)));
+  $('#gDots').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) guideGo(+b.dataset.i); });
+  const tr = $('#gTrack');
+  tr.addEventListener('scroll', () => { // 손가락으로 넘겼을 때 현재 페이지 갱신
+    clearTimeout(gScrollT);
+    gScrollT = setTimeout(() => { const i = Math.round(tr.scrollLeft / Math.max(1, tr.clientWidth)); if (i !== gIdx) { gIdx = clamp(i, 0, GUIDE.length - 1); guideUI(); } }, 80);
+  }, { passive: true });
+  tr.addEventListener('keydown', e => { if (e.key === 'ArrowRight') guideGo(gIdx + 1); if (e.key === 'ArrowLeft') guideGo(gIdx - 1); });
+  $('#guide').addEventListener('click', e => { if (e.target === $('#guide')) closeGuide(false); });
+  window.addEventListener('resize', () => { if ($('#guide').open) guideGo(gIdx, false); });
+}
+
+/* =====================================================================
    12. 이벤트 연결
    ===================================================================== */
 function bindUI() {
@@ -2301,8 +2536,9 @@ function bindUI() {
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.stop')) { e.preventDefault(); selectStop(e.target.dataset.id); }
   });
 
+  bindGuide();
   // 대화상자 (바깥 배경 탭 또는 닫기 버튼으로 닫힘)
-  for (const d of document.querySelectorAll('dialog')) {
+  for (const d of document.querySelectorAll('dialog:not(#guide)')) {
     d.addEventListener('click', e => { if (e.target === d || e.target.closest('[data-close]')) d.close('cancel'); });
   }
   $('#stopDialog').addEventListener('close', onDialogClose);
@@ -2369,6 +2605,7 @@ function init() {
   fitAll(false);
   scheduleRoute(0);
   if (kakaoKey()) setTimeout(() => loadKakao().catch(() => {}), 1200);
+  if (!guideHidden()) setTimeout(openGuide, 350); // 처음엔 사용법부터 ('다시 보지 않기' 전까지 매번)
 }
 document.addEventListener('DOMContentLoaded', init);
 })();
