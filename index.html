@@ -233,17 +233,18 @@ a{color:inherit;text-decoration:none;touch-action:manipulation}
 .map-key{display:flex;flex-wrap:wrap;gap:4px 14px;margin:12px 0 0;font-size:13px;font-weight:650;color:var(--text-2)}
 .map-key span{display:inline-flex;align-items:center;gap:6px}
 .k-stop{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;background:#1d4ed8;color:#fff;font-size:11px;font-style:normal;font-weight:800}
-.k-heat{width:14px;height:14px;border-radius:50%;background:#5c0011;box-shadow:-9px 0 0 -2px #fb6a4a}
+.k-heat{width:14px;height:14px;border-radius:50%;background:#b3001b;box-shadow:-9px 0 0 -2px #fd8d3c}
 .k-heat{margin-left:8px}
 .legend{display:flex;align-items:center;gap:8px;margin:12px 0 2px;font-size:12.5px;font-weight:650;color:var(--text-3)}
 .legend i{flex:1;height:10px;border-radius:5px}
-.legend .sw{position:relative;height:14px;border-radius:4px;background:var(--h);box-shadow:inset 0 0 0 1px rgba(92,0,17,.35)}
+.legend .sw{position:relative;height:14px;border-radius:4px;background:var(--h);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
 .legend .sw em{position:absolute;left:0;right:0;top:16px;font-style:normal;font-size:10.5px;font-weight:700;text-align:center;color:var(--text-3);white-space:nowrap}
 .legend:has(.sw){margin-bottom:16px}
 .area-sum{margin:4px 0 2px}
 .rank{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:var(--h);color:#fff;font-size:14px;font-weight:800;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
 .area-row .rank{color:#fff}
-.heat{display:grid;place-items:center;width:var(--s);height:var(--s);border:1.5px solid #fff;border-radius:50%;background:var(--h);color:#fff;font:800 11px/1 var(--font);box-shadow:0 0 0 1px rgba(92,0,17,.55),0 1px 5px rgba(0,0,0,.35)}
+.heat{display:grid;place-items:center;width:var(--s);height:var(--s);border:2px solid #fff;border-radius:50%;background:var(--h);color:#fff;font:800 11px/1 var(--font);box-shadow:0 0 0 1px rgba(0,0,0,.45),0 1px 5px rgba(0,0,0,.35)}
+.heat.top{box-shadow:0 0 0 1px rgba(0,0,0,.5),0 0 0 4px rgba(179,0,27,.35),0 1px 6px rgba(0,0,0,.4)}
 .gnear{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:8px 0 6px;padding:10px 12px;border-radius:14px;background:var(--surface-2);font-size:13px;font-weight:650;color:var(--text-2)}
 .gnear .acts{margin-top:0}
 .time-budget{margin-top:10px}
@@ -450,7 +451,7 @@ dialog.kb{top:calc(var(--vv-top,0px) + 10px);bottom:auto;margin:0 auto}
 .g-rank b{font-size:1.05em}
 .g-rank small{display:block;font-size:.85em;color:var(--text-3)}
 .g-legend{display:flex;align-items:center;gap:.4em;margin:.2em 0 .4em;font-size:.85em;font-weight:700;color:var(--text-3)}
-.g-legend i{flex:1;height:.6em;border-radius:.3em;background:linear-gradient(90deg,#fff0ec 0 20%,#fcb4a5 20% 40%,#fb6a4a 40% 60%,#d4111e 60% 80%,#5c0011 80%)}
+.g-legend i{flex:1;height:.6em;border-radius:.3em;background:linear-gradient(90deg,#8c8c8c 0 20%,#f2b600 20% 40%,#fd8d3c 40% 60%,#ef3b2c 60% 80%,#b3001b 80%)}
 .g-note{padding:.55em .7em;border-radius:.9em;background:var(--surface-2);font-size:.9em;font-weight:650;color:var(--text-2);margin-bottom:.5em}
 /* 누르는 곳 표시: 퍼지는 원 + 손가락 */
 .g-tap{position:absolute;width:0;height:0;z-index:5}
@@ -1848,7 +1849,9 @@ const placeMeta = p => [p.kind, p.cuisine, fmtKm(p.dist / 1000), `도보 ${Math.
    8-1. 지역 탭: 고른 지역의 인기 장소를 진하기(빨강)로 표시
    ===================================================================== */
 const AREA_CATS = [['식당', '식당'], ['카페', '카페'], ['여행스팟', '관광지']];
-const HEAT = ['#5c0011', '#d4111e', '#fb6a4a', '#fcb4a5', '#fff0ec']; // 1단계(가장 유명)~5단계: 밝기 차이를 크게
+/* 1단계(가장 유명)~5단계. 밝기만 다르면 휴대폰 '어둡게 보기'(강제 다크 모드)에서 옅은 색이 짙게 바뀌어 구분이 사라짐
+   → 색상(빨강→주황→노랑→회색)과 크기로 구분해서 밝게·어둡게 모두에서 잘 보이게 */
+const HEAT = ['#b3001b', '#ef3b2c', '#fd8d3c', '#f2b600', '#8c8c8c'];
 const HEAT_LBL = ['상위 10%', '~25%', '~50%', '~75%', '나머지'];
 const heatLevel = f => f < 0.1 ? 0 : f < 0.25 ? 1 : f < 0.5 ? 2 : f < 0.75 ? 3 : 4; // f = 순위 / 전체 (0이 1등)
 let areaLayer = null, areaErr = false, areaFitKey = '';
@@ -1886,16 +1889,16 @@ function areasHtml() {
   if (!ensureOpenData(() => { if (state.tab === 'areas') { renderPanel(); renderAreas(true); } })) return h + '<div class="skel"></div>'.repeat(4);
   if (!state.areas.sel.length) {
     const mine = [...new Set(allStops().map(x => (regionAt(x.lat, x.lng) || {}).id).filter(id => REGIONS.some(r => r.id === id)))];
-    return h + `<div class="empty">${icon('pin', 'big')}<h3>어느 지역을 볼까요?</h3><p>위에서 지역을 누르면 지도에 인기 장소가 진한 빨강일수록 유명한 순으로 표시돼요.</p>${mine.length ? `<div class="acts"><button class="btn-sm primary" type="button" data-action="area-mine">${icon('route')}내 일정 지역 모두 보기</button></div>` : ''}</div>`;
+    return h + `<div class="empty">${icon('pin', 'big')}<h3>어느 지역을 볼까요?</h3><p>위에서 지역을 누르면 지도에 인기 장소가 빨강(유명)→주황→노랑→회색(덜 유명) 순으로 표시돼요.</p>${mine.length ? `<div class="acts"><button class="btn-sm primary" type="button" data-action="area-mine">${icon('route')}내 일정 지역 모두 보기</button></div>` : ''}</div>`;
   }
   const items = areaItems();
   const names = state.areas.sel.map(id => REGION_BY_ID[id].ko).join(', ');
-  h += `<div class="map-key"><span><i class="k-stop">1</i>내 일정</span><span><i class="k-heat"></i>인기 장소 (진할수록·클수록 유명)</span></div>
+  h += `<div class="map-key"><span><i class="k-stop">1</i>내 일정</span><span><i class="k-heat"></i>인기 장소 (빨갈수록·클수록 유명)</span></div>
     <div class="legend"><span>유명</span>${HEAT.map((c, i) => `<i class="sw" style="--h:${c}" title="${HEAT_LBL[i]}"><em>${HEAT_LBL[i]}</em></i>`).join('')}<span>덜 유명</span></div>
     <p class="hint area-sum">${esc(names)} · ${areaCatLabel(state.areas.cat)} ${items.total}곳 중 상위 ${items.length}곳</p>`;
   if (!items.length) return h + `<div class="empty"><p>이 지역에 등록된 ${areaCatLabel(state.areas.cat)}가 없어요.</p></div>`;
   h += items.map(x => `<div class="place area-row" data-rank="${x.rank}">
-      <span class="rank" style="--h:${HEAT[x.lvl]}${x.lvl >= 3 ? ';color:#5c0011' : ''}" title="${HEAT_LBL[x.lvl]}">${x.rank}</span>
+      <span class="rank" style="--h:${HEAT[x.lvl]}${x.lvl === 3 ? ';color:#3b2f00' : ''}" title="${HEAT_LBL[x.lvl]}">${x.rank}</span>
       <div class="place-body">
         <div class="place-name">${esc(x.name)}</div>
         <div class="meta">${esc([x.kind, REGION_BY_ID[x.rid] ? REGION_BY_ID[x.rid].ko : '', x.blog != null ? `블로그 ${x.blog.toLocaleString()}건` : ''].filter(Boolean).join(' · '))}</div>
@@ -1914,9 +1917,9 @@ function renderAreas(fit) {
   sel.forEach(r => L.rectangle([[r.b[1], r.b[0]], [r.b[3], r.b[2]]], { color: '#dc2626', weight: 2, dashArray: '6 6', fillColor: '#dc2626', fillOpacity: 0.04, interactive: false }).addTo(areaLayer));
   const items = areaItems();
   items.slice().reverse().forEach(x => { // 덜 유명한 곳부터 그려서 유명한 곳이 위에 오게
-    const size = [22, 18, 15, 12, 10][x.lvl];
+    const size = [24, 19, 15, 12, 10][x.lvl];
     x.marker = L.marker([x.lat, x.lng], {
-      icon: L.divIcon({ className: '', html: `<div class="heat" style="--h:${HEAT[x.lvl]};--s:${size}px"></div>`, iconSize: [size, size], iconAnchor: [size / 2, size / 2], popupAnchor: [0, -size / 2] }),
+      icon: L.divIcon({ className: '', html: `<div class="heat${x.lvl ? '' : ' top'}" style="--h:${HEAT[x.lvl]};--s:${size}px"></div>`, iconSize: [size, size], iconAnchor: [size / 2, size / 2], popupAnchor: [0, -size / 2] }),
       title: `${x.rank}위 ${x.name}`, zIndexOffset: -3000 - x.rank, // 내 일정 핀이 항상 위에
     }).bindPopup(() => areaPopup(x), popupOpts('area')).addTo(areaLayer);
   });
@@ -2804,9 +2807,9 @@ const GUIDE = [
   { t: '시간이 붕 떴을 때: 주변', lead: '일정 장소 또는 내 현재 위치 기준으로 근처 식당·카페·명소를 찾아요.',
     stage: () => `<div class="gp">${gMap(true, false)}<span class="g-heat" style="left:66%;top:30%;--h:#ea580c;--d:1.5em"></span><span class="g-heat" style="left:48%;top:20%;--h:#9333ea;--d:1.5em"></span><div class="g-sheet" style="--sh:64%">${gHead(1)}<div class="g-row"><span class="g-seg" style="margin:0"><span>일정 기준</span><span class="on">내 위치${C(1)}${T}</span></span></div><div class="g-note">⏱ 다음 일정 14:40까지 <b>1시간 30분</b> · 걸어서 다녀올 수 있는 2.3km 이내만 보여요${C(2)}</div><div class="g-row" style="flex-wrap:wrap"><span style="font-size:.9em;font-weight:700;color:var(--text-3)">구글맵에서 별점 보며 찾기</span><span class="g-btn">맛집${C(3)}</span><span class="g-btn">카페</span><span class="g-btn">관광지</span></div></div></div>`,
     steps: ['<b>내 위치</b>를 누르면 지금 있는 곳 근처를 보여줘요. (일정 기준은 선택한 일정 장소 주변)', '<b>다음 일정까지 남은 시간</b>을 계산해서, 다녀올 수 있는 거리 안의 곳만 골라줘요.', '<b>구글맵 버튼</b>(제주는 <b>네이버지도</b>)으로 그 자리 주변 맛집·카페·관광지를 별점·리뷰와 함께 확인해요.'] },
-  { t: '지역별 인기 장소', lead: '발리는 17개, 제주는 14개 지역으로 나눴어요. 지역을 고르면 유명한 곳일수록 진한 빨강으로 보여요.',
-    stage: () => `<div class="gp">${gMap(false, false)}<div class="g-box" style="left:18%;top:7%;width:62%;height:28%"></div>${[[30, 14, 0], [52, 20, 0], [64, 12, 1], [40, 26, 1], [70, 28, 2], [26, 31, 2], [58, 31, 3], [46, 10, 3], [74, 18, 4], [34, 20, 4]].map(([x, y, l]) => `<span class="g-heat" style="left:${x}%;top:${y}%;--h:${HEAT[l]};--d:${[1.6, 1.35, 1.15, 1, .85][l]}em"></span>`).join('')}<span class="g-pin" style="left:44%;top:17%">3</span><span class="g-pin on" style="left:66%;top:24%">4</span><div class="g-sheet" style="--sh:62%">${gHead(2)}<div class="g-row"><span class="g-chip on">짐바란${C(1)}${T}</span><span class="g-chip on">울루와뚜</span><span class="g-chip">우붓</span></div><div class="g-row"><span class="g-seg" style="margin:0;flex:1;justify-content:space-around"><span class="on">식당</span><span>카페</span><span>관광지${C(2)}</span></span></div><div class="g-legend"><span style="display:inline-grid;place-items:center;width:1.4em;height:1.4em;border-radius:.45em;background:#1d4ed8;color:#fff;font-size:.8em">1</span>내 일정 · 덜 유명<i></i>유명${C(3)}</div><div class="g-rank"><i style="--h:#5c0011">1</i><div><b>Menega Cafe</b><small>해산물 · 블로그 950건</small></div></div><div class="g-rank"><i style="--h:#d4111e">2</i><div><b>Sundara</b><small>식당 · 블로그 410건</small></div></div></div></div>`,
-    steps: ['<b>지역 버튼</b>을 누르면 지도에 그 지역 경계와 인기 장소가 표시돼요. 여러 지역을 고르면 범위와 개수가 넓이만큼 늘어나요.', '<b>식당·카페·관광지</b>를 바꿔 가며 볼 수 있어요.', '<b>빨간 점은 진하고 클수록 유명</b>해요. 파란 네모 번호는 내 일정이에요. 순위는 공개 지도 데이터 인지도와 네이버 블로그 언급 수를 합친 거예요.'] },
+  { t: '지역별 인기 장소', lead: '발리는 17개, 제주는 14개 지역으로 나눴어요. 지역을 고르면 유명한 곳일수록 빨갛고 크게 보여요.',
+    stage: () => `<div class="gp">${gMap(false, false)}<div class="g-box" style="left:18%;top:7%;width:62%;height:28%"></div>${[[30, 14, 0], [52, 20, 0], [64, 12, 1], [40, 26, 1], [70, 28, 2], [26, 31, 2], [58, 31, 3], [46, 10, 3], [74, 18, 4], [34, 20, 4]].map(([x, y, l]) => `<span class="g-heat" style="left:${x}%;top:${y}%;--h:${HEAT[l]};--d:${[1.6, 1.35, 1.15, 1, .85][l]}em"></span>`).join('')}<span class="g-pin" style="left:44%;top:17%">3</span><span class="g-pin on" style="left:66%;top:24%">4</span><div class="g-sheet" style="--sh:62%">${gHead(2)}<div class="g-row"><span class="g-chip on">짐바란${C(1)}${T}</span><span class="g-chip on">울루와뚜</span><span class="g-chip">우붓</span></div><div class="g-row"><span class="g-seg" style="margin:0;flex:1;justify-content:space-around"><span class="on">식당</span><span>카페</span><span>관광지${C(2)}</span></span></div><div class="g-legend"><span style="display:inline-grid;place-items:center;width:1.4em;height:1.4em;border-radius:.45em;background:#1d4ed8;color:#fff;font-size:.8em">1</span>내 일정 · 덜 유명<i></i>유명${C(3)}</div><div class="g-rank"><i style="--h:#b3001b">1</i><div><b>Menega Cafe</b><small>해산물 · 블로그 950건</small></div></div><div class="g-rank"><i style="--h:#ef3b2c">2</i><div><b>Sundara</b><small>식당 · 블로그 410건</small></div></div></div></div>`,
+    steps: ['<b>지역 버튼</b>을 누르면 지도에 그 지역 경계와 인기 장소가 표시돼요. 여러 지역을 고르면 범위와 개수가 넓이만큼 늘어나요.', '<b>식당·카페·관광지</b>를 바꿔 가며 볼 수 있어요.', '<b>점이 빨갛고 클수록 유명</b>해요(빨강→주황→노랑→회색 순). 밝게·어둡게 화면 모두 같은 색이에요. 파란 네모 번호는 내 일정이에요. 순위는 공개 지도 데이터 인지도와 네이버 블로그 언급 수를 합친 거예요.'] },
   { t: '후기 찾아보기', lead: '선택한 일정 장소의 블로그 후기와 지도 리뷰를 한 번에 열어요.',
     stage: () => `<div class="gp">${gMap()}<div class="g-sheet" style="--sh:62%">${gHead(3)}<b style="display:block;font-size:1.15em;margin-bottom:.3em">4. Menega Cafe</b><div class="g-row" style="justify-content:space-between"><small style="color:var(--text-3)">블로그 정렬</small><span class="g-seg" style="margin:0"><span>최신순</span><span class="on">관련도순${C(2)}</span></span></div><div class="g-tiles"><div class="g-tile" style="grid-column:1/-1">📖 Menega Cafe 후기<small>네이버 블로그</small></div><div class="g-tile">🍴 짐바란 맛집<small>네이버 블로그</small>${C(1)}${T}</div><div class="g-tile">☕ 짐바란 카페<small>네이버 블로그</small></div><div class="g-tile">🗺️ 가볼만한곳<small>네이버 블로그</small></div><div class="g-tile">📍 구글 지도 리뷰<small>Google 지도</small></div></div></div></div>`,
     steps: ['버튼을 누르면 <b>네이버 블로그·구글 지도</b>의 실제 검색 결과가 새 창으로 열려요. 발리는 "짐바란 맛집"처럼 <b>지역 이름</b>으로 찾아줘요.', '<b>관련도순</b>은 많이 언급된 글, <b>최신순</b>은 최근 글이 먼저 나와요.'] },
